@@ -4,17 +4,17 @@
 #include <stdint.h>
 
 typedef struct {
-    // TODO: add fields
-    uint64_t whole;
-    uint64_t fraction;
-    uint8_t tag;
-    // 0 valid/non-negative
-    // 1 valid/negative
-    // 2 error value
-    // 3 positive overflow
-    // 4 negative overflow
-    // 5 positive underflow
-    // 6 negative underflow
+  // TODO: add fields
+  uint64_t whole;
+  uint64_t fraction;
+  uint8_t tag;
+  // 0 valid/non-negative
+  // 1 valid/negative
+  // 2 error value
+  // 3 positive overflow
+  // 4 negative overflow
+  // 5 positive underflow
+  // 6 negative underflow
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.

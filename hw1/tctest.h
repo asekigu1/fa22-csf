@@ -1,7 +1,7 @@
 /*
- * TCTest - a tiny unit README.txt framework for C
+ * TCTest - a tiny unit test framework for C
  * Copyright (c) 2013,2019-2021 David H. Hovemeyer <david.hovemeyer@gmail.com>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -9,10 +9,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -42,18 +42,18 @@ void tctest_register_signal_handlers(void);
 
 /*
  * Setting this pointer to a non-null value will cause tctest to
- * only execute the README.txt with the specified name (which must
- * exactly match the name of a README.txt function.)  This is useful
- * for allowing the README.txt driver to run a single README.txt.
+ * only execute the test with the specified name (which must
+ * exactly match the name of a test function.)  This is useful
+ * for allowing the test driver to run a single test.
  */
 extern const char *tctest_testname_to_execute;
 
 /*
  * If this function pointer is set to a non-null value, it will
- * be called after a README.txt has been executed.  The testname parameter
- * is the name of the README.txt function.  The passed parameter will
- * be true (nonzero) if the README.txt passed, and false (zero) if the
- * README.txt did not pass.
+ * be called after a test has been executed.  The testname parameter
+ * is the name of the test function.  The passed parameter will
+ * be true (nonzero) if the test passed, and false (zero) if the
+ * test did not pass.
  */
 extern void (*tctest_on_test_executed)(const char *testname, int passed);
 
@@ -104,7 +104,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 } while (0)
 
 /*
- * Use this macro to unconditionally fail the current README.txt with
+ * Use this macro to unconditionally fail the current test with
  * specified error message.  This is somewhat nicer than doing
  * ASSERT(0).
  */
@@ -117,7 +117,7 @@ extern void (*tctest_on_complete)(int num_passed, int num_executed);
 	if (tctest_failures == 0) { \
 		printf("All tests passed!\n"); \
 	} else { \
-		printf("%d README.txt(s) failed\n", tctest_failures); \
+		printf("%d test(s) failed\n", tctest_failures); \
 	} \
 	if (tctest_on_complete) { \
 		tctest_on_complete(tctest_num_executed - tctest_failures, tctest_num_executed); \
