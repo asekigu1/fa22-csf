@@ -4,17 +4,16 @@
 #include <stdint.h>
 
 typedef struct {
-    // TODO: add fields
+    uint8_t valid;
+    uint8_t nonNegative;
+    uint8_t overflow;
+    uint8_t underflow;
+} Flags;
+
+typedef struct {
     uint64_t whole;
     uint64_t fraction;
-    uint8_t tag;
-    // 0 valid/non-negative
-    // 1 valid/negative
-    // 2 error value
-    // 3 positive overflow
-    // 4 negative overflow
-    // 5 positive underflow
-    // 6 negative underflow
+    Flags flags;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.
@@ -85,7 +84,7 @@ uint64_t fixedpoint_frac_part(Fixedpoint val);
 //   if the sum left + right is not in the range of values that can be
 //   represented, then a value for which either fixedpoint_is_overflow_pos or
 //   fixedpoint_is_overflow_neg returns true is returned (depending on whether
-//   the overflow was positive or negative)
+//   the overflow was nonNegative or negative)
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right);
 
 // Compute the difference of two valid Fixedpoint values.
@@ -100,7 +99,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right);
 //   if the difference left - right is not in the range of values that can be
 //   represented, then a value for which either fixedpoint_is_overflow_pos or
 //   fixedpoint_is_overflow_neg returns true is returned (depending on whether
-//   the overflow was positive or negative)
+//   the overflow was nonNegative or negative)
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right);
 
 // Negate a valid Fixedpoint value.  (I.e. a value with the same magnitude but
@@ -123,7 +122,7 @@ Fixedpoint fixedpoint_negate(Fixedpoint val);
 //   a Fixedpoint value exactly 1/2 of the given one, if it can be represented exactly;
 //   otherwise, a Fixedpoint value for which either fixedpoint_is_underflow_pos
 //   or fixedpoint_is_underflow_neg returns true (depending on whether the
-//   computed value would have been positive or negative)
+//   computed value would have been nonNegative or negative)
 Fixedpoint fixedpoint_halve(Fixedpoint val);
 
 // Return a Fixedpoint value that is exactly twice the value of the given one.
@@ -135,7 +134,7 @@ Fixedpoint fixedpoint_halve(Fixedpoint val);
 //   a Fixedpoint value exactly twice the given one, if it can be represented exactly;
 //   otherwise, a Fixedpoint value for which either fixedpoint_is_overflow_pos
 //   or fixedpoint_is_overflow_neg returns true (depending on whether the
-//   computed value would have been positive or negative)
+//   computed value would have been nonNegative or negative)
 Fixedpoint fixedpoint_double(Fixedpoint val);
 
 // Compare two valid Fixedpoint values.
@@ -196,15 +195,15 @@ int fixedpoint_is_neg(Fixedpoint val);
 //   0 otherwise
 int fixedpoint_is_overflow_neg(Fixedpoint val);
 
-// Determine whether a Fixedpoint value is the result of positive overflow.
-// Positive overflow results when a sum, difference, or product is positive
+// Determine whether a Fixedpoint value is the result of nonNegative overflow.
+// Positive overflow results when a sum, difference, or product is nonNegative
 // and has a magnitude that is too large to represent.
 //
 // Parameters:
 //   val - the Fixedpoint value
 //
 // Returns:
-//   1 if val is the result of an operation where positive overflow occurred;
+//   1 if val is the result of an operation where nonNegative overflow occurred;
 //   0 otherwise
 int fixedpoint_is_overflow_pos(Fixedpoint val);
 
@@ -221,16 +220,16 @@ int fixedpoint_is_overflow_pos(Fixedpoint val);
 //   0 otherwise
 int fixedpoint_is_underflow_neg(Fixedpoint val);
 
-// Determine whether a Fixedpoint value is the result of positive underflow.
+// Determine whether a Fixedpoint value is the result of nonNegative underflow.
 // Positive underflow occurs when a division (i.e., fixedpoint_halve)
-// produces a value that is positive, and can't be exactly represented because
+// produces a value that is nonNegative, and can't be exactly represented because
 // the fractional part of the representation doesn't have enough bits.
 //
 // Parameters:
 //   val - the Fixedpoint value
 //
 // Returns:
-//   1 if val is the result of an operation where positive underflow occurred;
+//   1 if val is the result of an operation where nonNegative underflow occurred;
 //   0 otherwise
 int fixedpoint_is_underflow_pos(Fixedpoint val);
 

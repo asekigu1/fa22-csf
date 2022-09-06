@@ -23,6 +23,7 @@ void cleanup(TestObjs *objs);
 // test functions
 void test_whole_part(TestObjs *objs);
 void test_frac_part(TestObjs *objs);
+void test_is_zero(TestObjs *objs);
 void test_create_from_hex(TestObjs *objs);
 void test_format_as_hex(TestObjs *objs);
 void test_negate(TestObjs *objs);
@@ -43,6 +44,7 @@ int main(int argc, char **argv) {
 
     TEST(test_whole_part);
     TEST(test_frac_part);
+    TEST(test_is_zero);
     TEST(test_create_from_hex);
     TEST(test_format_as_hex);
     TEST(test_negate);
@@ -96,6 +98,15 @@ void test_frac_part(TestObjs *objs) {
     ASSERT(0x4000000000000000UL == fixedpoint_frac_part(objs->one_fourth));
     ASSERT(0xec9a1e2418UL == fixedpoint_frac_part(objs->large1));
     ASSERT(0x4d1a23c24fafUL == fixedpoint_frac_part(objs->large2));
+}
+
+void test_is_zero(TestObjs *objs) {
+    ASSERT(1 == fixedpoint_is_zero(objs->zero));
+    ASSERT(0 == fixedpoint_is_zero(objs->one));
+    ASSERT(0 == fixedpoint_is_zero(objs->one_half));
+    ASSERT(0 == fixedpoint_is_zero(objs->one_fourth));
+    ASSERT(0 == fixedpoint_is_zero(objs->large1));
+    ASSERT(0 == fixedpoint_is_zero(objs->large2));
 }
 
 void test_create_from_hex(TestObjs *objs) {
