@@ -4,17 +4,22 @@
 #include <stdint.h>
 
 typedef struct {
-    uint8_t valid;
-    uint8_t nonNegative;
-    uint8_t overflow;
-    uint8_t underflow;
-} Flags;
-
-typedef struct {
-    uint64_t whole;
-    uint64_t fraction;
-    Flags flags;
+    uint64_t whole_p;
+    uint64_t frac_p;
+    unsigned tag;
 } Fixedpoint;
+
+
+// tag values
+#define VALID_NONNEG      1
+#define VALID_NEG         2
+#define ERROR_VALUE       3
+#define POS_OVERFLOW      4
+#define NEG_OVERFLOW      5
+#define POS_UNDERFLOW     6
+#define NEG_UNDERFLOW     7
+
+
 
 // Create a Fixedpoint value representing an integer.
 //

@@ -113,12 +113,101 @@ void test_create_from_hex(TestObjs *objs) {
     (void) objs;
 
     Fixedpoint val1 = fixedpoint_create_from_hex("f6a5865.00f2");
-
     ASSERT(fixedpoint_is_valid(val1));
-
+    ASSERT(!fixedpoint_is_err(val1));
     ASSERT(0xf6a5865UL == fixedpoint_whole_part(val1));
-
     ASSERT(0x00f2000000000000UL == fixedpoint_frac_part(val1));
+    ASSERT(!fixedpoint_is_neg(val1));
+
+    Fixedpoint val2 = fixedpoint_create_from_hex("0");
+    ASSERT(fixedpoint_is_valid(val2));
+    ASSERT(!fixedpoint_is_err(val2));
+    ASSERT(0UL == fixedpoint_whole_part(val2));
+    ASSERT(0UL == fixedpoint_frac_part(val2));
+    ASSERT(!fixedpoint_is_neg(val2));
+
+    Fixedpoint val3 = fixedpoint_create_from_hex("-3a");
+    ASSERT(fixedpoint_is_valid(val3));
+    ASSERT(!fixedpoint_is_err(val3));
+    ASSERT(0x3a == fixedpoint_whole_part(val3));
+    ASSERT(0UL == fixedpoint_frac_part(val3));
+    ASSERT(fixedpoint_is_neg(val3));
+
+    Fixedpoint val4 = fixedpoint_create_from_hex("-f6a5865.028d01000bc");
+    ASSERT(fixedpoint_is_valid(val4));
+    ASSERT(!fixedpoint_is_err(val4));
+    ASSERT(0xf6a5865UL == fixedpoint_whole_part(val4));
+    ASSERT(0x028d01000bc00000UL == fixedpoint_frac_part(val4));
+    ASSERT(fixedpoint_is_neg(val4));
+
+    Fixedpoint val5 = fixedpoint_create_from_hex("UXYZ");
+    ASSERT(fixedpoint_is_err(val5));
+
+    Fixedpoint val6 = fixedpoint_create_from_hex("-imt.0192");
+    ASSERT(fixedpoint_is_err(val6));
+
+    Fixedpoint val7 = fixedpoint_create_from_hex("-.028d01000bc");
+    ASSERT(fixedpoint_is_valid(val7));
+    ASSERT(!fixedpoint_is_err(val7));
+    ASSERT(0UL == fixedpoint_whole_part(val7));
+    ASSERT(0x028d01000bc00000UL == fixedpoint_frac_part(val7));
+    ASSERT(fixedpoint_is_neg(val7));
+
+    Fixedpoint val8 = fixedpoint_create_from_hex(".028d01000bc");
+    ASSERT(fixedpoint_is_valid(val8));
+    ASSERT(!fixedpoint_is_err(val8));
+    ASSERT(0UL == fixedpoint_whole_part(val8));
+    ASSERT(0x028d01000bc00000UL == fixedpoint_frac_part(val8));
+    ASSERT(!fixedpoint_is_neg(val8));
+
+    Fixedpoint val9 = fixedpoint_create_from_hex("BcF.");
+    ASSERT(fixedpoint_is_valid(val9));
+    ASSERT(!fixedpoint_is_err(val9));
+    ASSERT(0xbcfUL == fixedpoint_whole_part(val9));
+    ASSERT(0UL == fixedpoint_frac_part(val9));
+    ASSERT(!fixedpoint_is_neg(val9));
+
+    Fixedpoint valA = fixedpoint_create_from_hex("-BcF.");
+    ASSERT(fixedpoint_is_valid(valA));
+    ASSERT(!fixedpoint_is_err(valA));
+    ASSERT(0xbcfUL == fixedpoint_whole_part(valA));
+    ASSERT(0UL == fixedpoint_frac_part(valA));
+    ASSERT(fixedpoint_is_neg(valA));
+
+    Fixedpoint valb = fixedpoint_create_from_hex("123");
+    ASSERT(fixedpoint_is_valid(valb));
+    ASSERT(!fixedpoint_is_err(valb));
+    ASSERT(0x123UL == fixedpoint_whole_part(valb));
+    ASSERT(0UL == fixedpoint_frac_part(valb));
+    ASSERT(!fixedpoint_is_neg(valb));
+
+    Fixedpoint valc = fixedpoint_create_from_hex("-123");
+    ASSERT(fixedpoint_is_valid(valc));
+    ASSERT(!fixedpoint_is_err(valc));
+    ASSERT(0x123UL == fixedpoint_whole_part(valc));
+    ASSERT(0UL == fixedpoint_frac_part(valc));
+    ASSERT(fixedpoint_is_neg(valc));
+
+    Fixedpoint vald = fixedpoint_create_from_hex("ABACAB");
+    ASSERT(fixedpoint_is_valid(vald));
+    ASSERT(!fixedpoint_is_err(vald));
+    ASSERT(0xabacabUL == fixedpoint_whole_part(vald));
+    ASSERT(0UL == fixedpoint_frac_part(vald));
+    ASSERT(!fixedpoint_is_neg(vald));
+
+    Fixedpoint vale = fixedpoint_create_from_hex("1");
+    ASSERT(fixedpoint_is_valid(vale));
+    ASSERT(!fixedpoint_is_err(vale));
+    ASSERT(1UL == fixedpoint_whole_part(vale));
+    ASSERT(0UL == fixedpoint_frac_part(vale));
+    ASSERT(!fixedpoint_is_neg(vale));
+
+    Fixedpoint valf = fixedpoint_create_from_hex("0.00001");
+    ASSERT(fixedpoint_is_valid(valf));
+    ASSERT(!fixedpoint_is_err(valf));
+    ASSERT(0UL == fixedpoint_whole_part(valf));
+    ASSERT(0000100000000000UL == fixedpoint_frac_part(valf));
+    ASSERT(!fixedpoint_is_neg(valf));
 }
 
 void test_format_as_hex(TestObjs *objs) {
