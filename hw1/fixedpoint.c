@@ -103,25 +103,29 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
 
     Fixedpoint fp2;
     if (left.tag != right.tag) {
-        int leftIsGreater = fixedpoint_compare(left, fixedpoint_negate(right));
+        int leftIsGreater;
+        if (left.tag == VALID_NONNEG) {
+            leftIsGreater = fixedpoint_compare(left, fixedpoint_negate(right));
+        } else {
+            leftIsGreater = fixedpoint_compare(fixedpoint_negate(left), right);
+        }
+
         if (leftIsGreater == 0) {
             return fixedpoint_create(0UL);
         } else if (leftIsGreater == 1) {
             fp2.tag = left.tag;
             fp2.whole_p = left.whole_p - right.whole_p;
             fp2.frac_p = left.frac_p - right.frac_p;
-            // acommodate wrapped fraction
+            // accommodate wrapped fraction
             if (right.frac_p > left.frac_p) {
-                fp2.frac_p += 1UL;
                 fp2.whole_p -= 1UL;
             }
         } else if (leftIsGreater == -1) {
             fp2.tag = right.tag;
             fp2.whole_p = right.whole_p - left.whole_p;
             fp2.frac_p = right.frac_p - left.frac_p;
-            // acommodate wrapped fraction
+            // accommodate wrapped fraction
             if (left.frac_p > right.frac_p) {
-                fp2.frac_p += 1UL;
                 fp2.whole_p -= 1UL;
             }
         }
