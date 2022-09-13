@@ -162,16 +162,17 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
 
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
     assert (fixedpoint_is_valid(val));
+    Fixedpoint fp2 = val;
     if (fixedpoint_is_zero(val)) {
         return val;
     }
     if (val.tag == VALID_NONNEG) {
-        val.tag = VALID_NEG;
+        fp2.tag = VALID_NEG;
     }
     if (val.tag == VALID_NEG) {
-        val.tag = VALID_NONNEG;
+        fp2.tag = VALID_NONNEG;
     }
-    return val;
+    return fp2;
 }
 
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
