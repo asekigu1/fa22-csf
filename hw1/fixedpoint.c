@@ -38,16 +38,20 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
     }
 
     // copy whole and frac values to new strings
-    char *wholeS = malloc(17);
-    char *fracS = malloc(17);
+    char wholeS[17] = "0";
+    char fracS[17] = "0";
+    int index = 0;
 
     while (ptr != NULL && *ptr != '\0') {
+        if (index >= 16) {
+            fp.tag = ERROR_VALUE;
+            return fp;
+        }
         if ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'A' && *ptr <= 'F') || (*ptr >= 'a' && *ptr <= 'f')) {
-            int length = strlen(wholeS);
-            wholeS[length] = *ptr;
+            wholeS[index] = *ptr;
+            index++;
             ptr++;
         } else if (*ptr == '.') {
-            wholeS = "0";
             ptr++;
             break;
         } else {
@@ -56,13 +60,17 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
         }
     }
 
+    index = 0;
     while (ptr != NULL && *ptr != '\0') {
+        if (index >= 16) {
+            fp.tag = ERROR_VALUE;
+            return fp;
+        }
         if ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'A' && *ptr <= 'F')
             || (*ptr >= 'a' && *ptr <= 'f')) {
-            int length = strlen(fracS);
-            fracS[length] = *ptr;
-            fracS[length + 1] = '\0';
+            fracS[index] = *ptr;
             ptr++;
+            index++;
         } else {
             fp.tag = ERROR_VALUE;
             return fp;
@@ -76,10 +84,6 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
 
     fp.whole_p = strtoull(wholeS, NULL, 16);
     fp.frac_p = strtoull(fracS, NULL, 16);
-
-
-    free(fracS);
-    free(wholeS);
     return fp;
 }
 
@@ -98,57 +102,33 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     assert(fixedpoint_is_valid(right));
 
     Fixedpoint fp2;
-    int leftIsGreater = 2;
-
-    // DIFFERENT SIGNS
-
-    // assign correct tag
-    if (left.tag == VALID_NONNEG && right.tag == VALID_NEG) {
-        leftIsGreater = fixedpoint_compare(left, fixedpoint_negate(right));
-        if (leftIsGreater == 1) {
-            fp2.tag = VALID_NONNEG;
+    if (left.tag != right.tag) {
+        int leftIsGreater = fixedpoint_compare(left, fixedpoint_negate(right));
+        if (leftIsGreater == 0) {
+            return fixedpoint_create(0UL);
+        } else if (leftIsGreater == 1) {
+            fp2.tag = left.tag;
+            fp2.whole_p = left.whole_p - right.whole_p;
+            fp2.frac_p = left.frac_p - right.frac_p;
+            // accomodate underflow
+            if (fp2.frac_p > left.frac_p) {
+                uint64_t leftFracAvailable = 0xFFFFFFFFFFFFFFFFUL - left.frac_p;
+                fp2.frac_p =  right.frac_p - leftFracAvailable;
+                fp2.whole_p -= 1UL;
+            }
         } else if (leftIsGreater == -1) {
-            fp2.tag = VALID_NEG;
+            fp2.tag = right.tag;
+            fp2.whole_p = right.whole_p - left.whole_p;
+            fp2.frac_p = right.frac_p - left.frac_p;
+            // accomodate underflow
+            if (fp2.frac_p > right.frac_p) {
+                uint64_t rightFracAvailable = 0xFFFFFFFFFFFFFFFFUL - right.frac_p;
+                fp2.frac_p =  left.frac_p - rightFracAvailable;
+                fp2.whole_p -= 1UL;
+            }
         }
-    }
-    if (left.tag == VALID_NEG && right.tag == VALID_NONNEG) {
-        leftIsGreater = fixedpoint_compare(fixedpoint_negate(left), right);
-        if (leftIsGreater == 1) {
-            fp2.tag = VALID_NEG;
-        } else if (leftIsGreater == -1) {
-            fp2.tag = VALID_NONNEG;
-        }
-    }
-    if (leftIsGreater == 0) {
-        return fixedpoint_create(0UL);
-    }
-
-    // calculate value
-    if (leftIsGreater == 1) {
-        fp2.whole_p = left.whole_p - right.whole_p;
-        fp2.frac_p = left.frac_p - right.frac_p;
-        // accomodate underflow
-        if (fp2.frac_p > left.frac_p) {
-            uint64_t leftFracAvailable = 0xFFFFFFFFFFFFFFFFUL - left.frac_p;
-            fp2.frac_p =  right.frac_p - leftFracAvailable;
-            fp2.whole_p -= 1UL;
-        }
-    } else if (leftIsGreater == -1) {
-        fp2.whole_p = right.whole_p - left.whole_p;
-        fp2.frac_p = right.frac_p - left.frac_p;
-        // accomodate underflow
-        if (fp2.frac_p > right.frac_p) {
-            uint64_t rightFracAvailable = 0xFFFFFFFFFFFFFFFFUL - right.frac_p;
-            fp2.frac_p =  left.frac_p - rightFracAvailable;
-            fp2.whole_p -= 1UL;
-        }
-    }
-
-    // return value
-    if ((left.tag == VALID_NONNEG && right.tag == VALID_NEG) || (left.tag == VALID_NEG && right.tag == VALID_NONNEG)) {
         return fp2;
     }
-
 
     // SAME SIGN
     fp2.whole_p = left.whole_p + right.whole_p;
@@ -160,7 +140,6 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
         fp2.frac_p =  right.frac_p - leftFracAvailable;
         fp2.whole_p += 1UL;
     }
-
     // invalid values
     if (left.tag == VALID_NONNEG && right.tag == VALID_NONNEG) {
         fp2.tag = VALID_NONNEG;

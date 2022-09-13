@@ -206,7 +206,7 @@ void test_create_from_hex(TestObjs *objs) {
     ASSERT(fixedpoint_is_valid(valf));
     ASSERT(!fixedpoint_is_err(valf));
     ASSERT(0UL == fixedpoint_whole_part(valf));
-    ASSERT(0000100000000000UL == fixedpoint_frac_part(valf));
+    ASSERT(0x0000100000000000UL == fixedpoint_frac_part(valf));
     ASSERT(!fixedpoint_is_neg(valf));
 }
 
