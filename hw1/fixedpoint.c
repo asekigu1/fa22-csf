@@ -110,20 +110,18 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
             fp2.tag = left.tag;
             fp2.whole_p = left.whole_p - right.whole_p;
             fp2.frac_p = left.frac_p - right.frac_p;
-            // accomodate underflow
-            if (fp2.frac_p > left.frac_p) {
-                uint64_t leftFracAvailable = 0xFFFFFFFFFFFFFFFFUL - left.frac_p;
-                fp2.frac_p =  right.frac_p - leftFracAvailable;
+            // acommodate wrapped fraction
+            if (right.frac_p > left.frac_p) {
+                fp2.frac_p += 1UL;
                 fp2.whole_p -= 1UL;
             }
         } else if (leftIsGreater == -1) {
             fp2.tag = right.tag;
             fp2.whole_p = right.whole_p - left.whole_p;
             fp2.frac_p = right.frac_p - left.frac_p;
-            // accomodate underflow
-            if (fp2.frac_p > right.frac_p) {
-                uint64_t rightFracAvailable = 0xFFFFFFFFFFFFFFFFUL - right.frac_p;
-                fp2.frac_p =  left.frac_p - rightFracAvailable;
+            // acommodate wrapped fraction
+            if (left.frac_p > right.frac_p) {
+                fp2.frac_p += 1UL;
                 fp2.whole_p -= 1UL;
             }
         }
@@ -135,21 +133,14 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     fp2.frac_p = left.frac_p + right.frac_p;
     // Handle fraction part overflow
     if (fp2.frac_p < left.frac_p) {
-        // update fp2.frac_p to overflow value
-        uint64_t leftFracAvailable = 0xFFFFFFFFFFFFFFFFUL - left.frac_p;
-        fp2.frac_p =  right.frac_p - leftFracAvailable;
         fp2.whole_p += 1UL;
     }
+    fp2.tag = left.tag;
     // invalid values
-    if (left.tag == VALID_NONNEG && right.tag == VALID_NONNEG) {
-        fp2.tag = VALID_NONNEG;
-        if (fp2.whole_p < left.whole_p) {
+    if (fp2.whole_p < left.whole_p) {
+        if (left.tag == VALID_NONNEG) {
             fp2.tag = POS_OVERFLOW;
-        }
-    }
-    if (left.tag == VALID_NEG && right.tag == VALID_NEG) {
-        fp2.tag = VALID_NEG;
-        if (fp2.whole_p < left.whole_p) {
+        } else if (left.tag == VALID_NEG) {
             fp2.tag = NEG_OVERFLOW;
         }
     }
