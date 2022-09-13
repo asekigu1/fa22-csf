@@ -22,79 +22,64 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-    // create copy string
-    char *copy = malloc(strlen(hex) + 1);
-    strcpy(copy, hex);
 
-    // copy whole and frac values to new strings
+    // new Fixedpoint
     Fixedpoint fp = {
             .whole_p = 0UL,
             .frac_p = 0UL,
             .tag = VALID_NONNEG,
     };
-    char *wholeS = NULL;
-    char *fracS = NULL;
-    char *ptr = strtok(copy, ".");
 
-    if (copy[0] == '-') {
+    // pointer to iterate through hex
+    char *ptr = hex;
+    if (hex[0] == '-') {
         fp.tag = VALID_NEG;
         ptr++;
     }
 
-    if (copy[0] == '.') {
-        wholeS = "0";
-        fracS = ptr;
-        size_t extra = 16 - strlen(fracS);
-        char *zeroes = "0000000000000000";
-        strncat(fracS, zeroes, extra);
-        ptr = strtok(NULL, ".");
-        if (ptr) {
-            fp.tag = ERROR_VALUE;
-            fp.frac_p = 0UL;
-            fp.whole_p = 0UL;
-            return fp;
-        }
-    } else {
-        if (ptr) {
-            wholeS = ptr;
-        } else {
+    // copy whole and frac values to new strings
+    char *wholeS = malloc(17);
+    char *fracS = malloc(17);
+
+    while (ptr != NULL && *ptr != '\0') {
+        if ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'A' && *ptr <= 'F') || (*ptr >= 'a' && *ptr <= 'f')) {
+            int length = strlen(wholeS);
+            wholeS[length] = *ptr;
+            ptr++;
+        } else if (*ptr == '.') {
             wholeS = "0";
-        }
-
-        ptr = strtok(NULL, ".");
-        if (ptr) {
-            // add zeroes to frac string
-            fracS = ptr;
-            size_t extra = 16 - strlen(fracS);
-            char *zeroes = "0000000000000000";
-            strncat(fracS, zeroes, extra);
-        } else {
-            fracS = "0000000000000000";
-        }
-    }
-
-    // check if whole and frac strings are valid
-    char *temp = wholeS;
-    while (temp != NULL && *temp != '\0') {
-        if ((*temp >= '0' && *temp <= '9') || (*temp >= 'A' && *temp <= 'F')
-        || (*temp >= 'a' && *temp <= 'f')) {
-            temp++;
-            continue;
+            ptr++;
+            break;
         } else {
             fp.tag = ERROR_VALUE;
-            fp.frac_p = 0UL;
-            fp.whole_p = 0UL;
             return fp;
         }
     }
+
+    while (ptr != NULL && *ptr != '\0') {
+        if ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'A' && *ptr <= 'F')
+            || (*ptr >= 'a' && *ptr <= 'f')) {
+            int length = strlen(fracS);
+            fracS[length] = *ptr;
+            fracS[length + 1] = '\0';
+            ptr++;
+        } else {
+            fp.tag = ERROR_VALUE;
+            return fp;
+        }
+    }
+
+    // add trailing zeroes to frac string
+    size_t extra = 16 - strlen(fracS);
+    char *zeroes = "0000000000000000";
+    strncat(fracS, zeroes, extra);
 
     fp.whole_p = strtoull(wholeS, NULL, 16);
-    fp.frac_p = 0UL;
-    if (fracS != NULL) {
-        fp.frac_p = strtoull(fracS, NULL, 16);
-    }
+    fp.frac_p = strtoull(fracS, NULL, 16);
 
-    free(copy);
+
+    free(fracS);
+    free(wholeS);
     return fp;
 }
 
