@@ -133,21 +133,24 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     }
 
     // SAME SIGN
+    fp2.tag = left.tag;
     fp2.whole_p = left.whole_p + right.whole_p;
     fp2.frac_p = left.frac_p + right.frac_p;
+
     // Handle fraction part overflow
     if (fp2.frac_p < left.frac_p) {
         fp2.whole_p += 1UL;
     }
-    fp2.tag = left.tag;
+
     // invalid values
-    if (fp2.whole_p < left.whole_p) {
+    if (fp2.whole_p < left.whole_p || (fp2.whole_p == left.whole_p && right.whole_p != 0)) {
         if (left.tag == VALID_NONNEG) {
             fp2.tag = POS_OVERFLOW;
         } else if (left.tag == VALID_NEG) {
             fp2.tag = NEG_OVERFLOW;
         }
     }
+
     return fp2;
 }
 
