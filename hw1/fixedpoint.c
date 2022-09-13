@@ -174,13 +174,23 @@ Fixedpoint fixedpoint_negate(Fixedpoint val) {
 }
 
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
-    // TODO: implement
     assert(fixedpoint_is_valid(val));
     Fixedpoint fp2;
     fp2.whole_p = val.whole_p/2;
     fp2.frac_p = val.frac_p/2;
     fp2.tag = val.tag;
+
     // check underflow
+    if (val.whole_p%2 == 1) {
+        fp2.frac_p += 0x8000000000000000UL;
+    }
+    if (val.frac_p%2 == 1) {
+        if (val.tag == VALID_NONNEG) {
+            fp2.tag = POS_UNDERFLOW;
+        } else if (val.tag == VALID_NEG) {
+            fp2.tag = NEG_UNDERFLOW;
+        }
+    }
     return fp2;
 }
 
