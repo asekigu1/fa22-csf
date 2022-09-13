@@ -162,14 +162,15 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
 
 Fixedpoint fixedpoint_negate(Fixedpoint val) {
     assert (fixedpoint_is_valid(val));
-
+    if (fixedpoint_is_zero(val)) {
+        return val;
+    }
     if (val.tag == VALID_NONNEG) {
         val.tag = VALID_NEG;
     }
     if (val.tag == VALID_NEG) {
         val.tag = VALID_NONNEG;
     }
-
     return val;
 }
 
@@ -259,28 +260,58 @@ int fixedpoint_is_valid(Fixedpoint val) {
 }
 
 char *fixedpoint_format_as_hex(Fixedpoint val) {
-    // TODO: implement
-    assert(0);
-    assert(fixedpoint_is_valid(val));
-    char *s = malloc(34);
+   assert(fixedpoint_is_valid(val));
 
-    sprintf(s, "%llx", val.whole_p);
-    if (val.frac_p != 0UL) {
-        char *fracStr = malloc(17);
-        sprintf(fracStr, ".%llx", val.frac_p);
-        char *ptr = fracStr;
-        while (ptr != NULL || ptr != '0') {
-            ptr++;
+        char *hex = malloc(34);
+        char buffer[17];
+        hex[0] = '\0';
+
+        if (val.tag == VALID_NEG) { strcat(hex, "-"); }
+
+        // whole part -> hex
+        sprintf(buffer, "%llx", val.whole_p);
+        strcat(hex, buffer);
+
+        // Appending frac -> hex
+        if (val.frac_p) {
+            strcat(hex, ".");
+            sprintf(buffer, "%016llx", val.frac_p);
+
+            // Removing zero from frac
+            int i = strlen(buffer) - 1;
+            while (buffer[i] == '0') {
+                i--;
+            }
+            buffer[i+1] = '\0';
+
+            strcat(hex, buffer);
         }
-        ptr = '\0';
-        strncat(s, fracStr, strlen(fracStr));
-        free(fracStr);
-    }
 
-    if (val.tag == VALID_NEG) {
-        char *temp = "-";
-        strncat(temp, s, strlen(s));
-        strcpy(s, temp);
-    }
-    return s;
+        return hex;
+//    // TODO: implement
+//    assert(fixedpoint_is_valid(val));
+//    char *s = malloc(34);
+//
+//    sprintf(s, "%llx", val.whole_p);
+//    if (val.frac_p != 0UL) {
+//        char *fracStr = malloc(17);
+//        sprintf(fracStr, ".%llx", val.frac_p);
+//        char *ptr = fracStr;
+//        while (ptr != NULL || ptr != '0') {
+//            ptr++;
+//        }
+//        ptr = '\0';
+//        strncat(s, fracStr, strlen(fracStr));
+//        free(fracStr);
+//    }
+//
+//    if (val.tag == VALID_NEG) {
+//        char *temp = "-";
+//        strncat(temp, s, strlen(s));
+//        strcpy(s, temp);
+//    }
+//    return s;
+
+
+
 }
