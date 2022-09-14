@@ -59,7 +59,7 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
         }
     }
 
-    if (indexW > 16 || indexF > 16) {
+    if (indexW > 16 || indexF > 16 || (indexW == 0 && indexF == 0)) {
         fp.tag = ERROR_VALUE;
         return fp;
     }

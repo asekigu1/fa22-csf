@@ -357,7 +357,9 @@ void test_is_overflow_pos(TestObjs *objs) {
     Fixedpoint fp_neg = fixedpoint_negate(objs->max);
     sum = fixedpoint_sub(objs->one, fp_neg);
     ASSERT(fixedpoint_is_overflow_pos(sum));
+
     Fixedpoint fp2;
+
     fp2 = fixedpoint_double(objs->max);
     ASSERT(fixedpoint_is_overflow_pos(fp2));
 }
@@ -393,4 +395,20 @@ void test_is_err(TestObjs *objs) {
     // invalid hex digits in fractional part
     Fixedpoint err7 = fixedpoint_create_from_hex("7.0?4");
     ASSERT(fixedpoint_is_err(err7));
+
+    // negative sign in wrong position
+    Fixedpoint err9 = fixedpoint_create_from_hex("abd.-1234");
+    ASSERT(fixedpoint_is_err(err9));
+
+    // too many periods
+    Fixedpoint err10 = fixedpoint_create_from_hex("a..b");
+    ASSERT(fixedpoint_is_err(err10));
+
+    //more than one negative sign
+    Fixedpoint err11 = fixedpoint_create_from_hex("--abc,123");
+    ASSERT(fixedpoint_is_err(err11));
+
+    // empty
+    Fixedpoint err8 = fixedpoint_create_from_hex("");
+    ASSERT(fixedpoint_is_err(err8));
 }
