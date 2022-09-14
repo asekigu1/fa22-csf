@@ -5,9 +5,6 @@
 #include <assert.h>
 #include "fixedpoint.h"
 
-// You can remove this once all of the functions are fully implemented
-static Fixedpoint DUMMY;
-
 Fixedpoint fixedpoint_create(uint64_t whole) {
     return fixedpoint_create2(whole,0);
 }
@@ -22,34 +19,24 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-
-    // new Fixedpoint
     Fixedpoint fp = {
             .whole_p = 0UL,
             .frac_p = 0UL,
             .tag = VALID_NONNEG,
     };
-
-    // pointer to iterate through hex
     char *ptr = hex;
     if (hex[0] == '-') {
         fp.tag = VALID_NEG;
         ptr++;
     }
-
-    // copy whole and frac values to new strings
     char wholeS[17] = "0";
     char fracS[17] = "0";
-    int index = 0;
+    int indexW = 0;
 
     while (ptr != NULL && *ptr != '\0') {
-        if (index >= 16) {
-            fp.tag = ERROR_VALUE;
-            return fp;
-        }
         if ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'A' && *ptr <= 'F') || (*ptr >= 'a' && *ptr <= 'f')) {
-            wholeS[index] = *ptr;
-            index++;
+            wholeS[indexW] = *ptr;
+            indexW++;
             ptr++;
         } else if (*ptr == '.') {
             ptr++;
@@ -60,28 +47,27 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
         }
     }
 
-    index = 0;
+    int indexF = 0;
     while (ptr != NULL && *ptr != '\0') {
-        if (index >= 16) {
-            fp.tag = ERROR_VALUE;
-            return fp;
-        }
-        if ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'A' && *ptr <= 'F')
-            || (*ptr >= 'a' && *ptr <= 'f')) {
-            fracS[index] = *ptr;
+        if ((*ptr >= '0' && *ptr <= '9') || (*ptr >= 'A' && *ptr <= 'F') || (*ptr >= 'a' && *ptr <= 'f')) {
+            fracS[indexF] = *ptr;
             ptr++;
-            index++;
+            indexF++;
         } else {
             fp.tag = ERROR_VALUE;
             return fp;
         }
     }
 
+    if (indexW >= 16 || indexF >= 16) {
+        fp.tag = ERROR_VALUE;
+        return fp;
+    }
+
     // add trailing zeroes to frac string
     size_t extra = 16 - strlen(fracS);
     char *zeroes = "0000000000000000";
     strncat(fracS, zeroes, extra);
-
     fp.whole_p = strtoull(wholeS, NULL, 16);
     fp.frac_p = strtoull(fracS, NULL, 16);
     return fp;
@@ -101,7 +87,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     assert(fixedpoint_is_valid(left));
     assert(fixedpoint_is_valid(right));
 
-    Fixedpoint fp2;
+    Fixedpoint fp2 = fixedpoint_create(0UL);
     if (left.tag != right.tag) {
         int leftIsGreater;
         if (left.tag == VALID_NONNEG) {
@@ -195,10 +181,7 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
 }
 
 Fixedpoint fixedpoint_double(Fixedpoint val) {
-    assert (fixedpoint_is_valid(val));
-    Fixedpoint fp2;
-    fp2 = fixedpoint_add(val, val);
-    return fp2;
+    return fixedpoint_add(val, val);
 }
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
@@ -270,57 +253,30 @@ int fixedpoint_is_valid(Fixedpoint val) {
 
 char *fixedpoint_format_as_hex(Fixedpoint val) {
    assert(fixedpoint_is_valid(val));
+   char *hex = malloc(34);
+   char buffer[17];
+   hex[0] = '\0';
 
-        char *hex = malloc(34);
-        char buffer[17];
-        hex[0] = '\0';
+   if (val.tag == VALID_NEG) { strcat(hex, "-"); }
 
-        if (val.tag == VALID_NEG) { strcat(hex, "-"); }
+   // whole part -> hex
+   sprintf(buffer, "%llx", val.whole_p);
+   strcat(hex, buffer);
 
-        // whole part -> hex
-        sprintf(buffer, "%llx", val.whole_p);
-        strcat(hex, buffer);
+   // Appending frac -> hex
+   if (val.frac_p) {
+       strcat(hex, ".");
+       sprintf(buffer, "%016llx", val.frac_p);
 
-        // Appending frac -> hex
-        if (val.frac_p) {
-            strcat(hex, ".");
-            sprintf(buffer, "%016llx", val.frac_p);
+       // Removing zero from frac
+       int i = strlen(buffer) - 1;
+       while (buffer[i] == '0') {
+           i--;
+       }
+       buffer[i+1] = '\0';
 
-            // Removing zero from frac
-            int i = strlen(buffer) - 1;
-            while (buffer[i] == '0') {
-                i--;
-            }
-            buffer[i+1] = '\0';
+       strcat(hex, buffer);
+   }
 
-            strcat(hex, buffer);
-        }
-
-        return hex;
-//    // TODO: implement
-//    assert(fixedpoint_is_valid(val));
-//    char *s = malloc(34);
-//
-//    sprintf(s, "%llx", val.whole_p);
-//    if (val.frac_p != 0UL) {
-//        char *fracStr = malloc(17);
-//        sprintf(fracStr, ".%llx", val.frac_p);
-//        char *ptr = fracStr;
-//        while (ptr != NULL || ptr != '0') {
-//            ptr++;
-//        }
-//        ptr = '\0';
-//        strncat(s, fracStr, strlen(fracStr));
-//        free(fracStr);
-//    }
-//
-//    if (val.tag == VALID_NEG) {
-//        char *temp = "-";
-//        strncat(temp, s, strlen(s));
-//        strcpy(s, temp);
-//    }
-//    return s;
-
-
-
+   return hex;
 }
