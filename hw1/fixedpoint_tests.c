@@ -12,8 +12,6 @@ typedef struct {
     Fixedpoint large1;
     Fixedpoint large2;
     Fixedpoint max;
-
-    // TODO: add more objects to the test fixture
 } TestObjs;
 
 // functions to create and destroy the test fixture
@@ -31,7 +29,6 @@ void test_add(TestObjs *objs);
 void test_sub(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
-// TODO: add more test functions
 
 int main(int argc, char **argv) {
     // if a testname was specified on the command line, only that
@@ -278,6 +275,36 @@ void test_negate(TestObjs *objs) {
     ASSERT(0x4000000000000000UL == fixedpoint_frac_part(objs->one_fourth));
     ASSERT(0xec9a1e2418UL == fixedpoint_frac_part(objs->large1));
     ASSERT(0x4d1a23c24fafUL == fixedpoint_frac_part(objs->large2));
+
+    //initialization
+    Fixedpoint zero_pos = fixedpoint_negate(zero_neg);
+    Fixedpoint one_pos = fixedpoint_negate(one_neg);
+    Fixedpoint one_half_pos = fixedpoint_negate(one_half_neg);
+    Fixedpoint one_fourth_pos = fixedpoint_negate(one_fourth_neg);
+    Fixedpoint large1_pos = fixedpoint_negate(large1_neg);
+    Fixedpoint large2_pos = fixedpoint_negate(large2_neg);
+
+    // check if all values are negated
+    ASSERT(!fixedpoint_is_neg(one_pos));
+    ASSERT(!fixedpoint_is_neg(one_half_pos));
+    ASSERT(!fixedpoint_is_neg(one_fourth_pos));
+    ASSERT(!fixedpoint_is_neg(large1_pos));
+    ASSERT(!fixedpoint_is_neg(large2_pos));
+    ASSERT(!fixedpoint_is_neg(zero_pos));
+
+    // check if magnitudes are the same
+    ASSERT(0UL == fixedpoint_whole_part(objs->zero));
+    ASSERT(1UL == fixedpoint_whole_part(objs->one));
+    ASSERT(0UL == fixedpoint_whole_part(objs->one_half));
+    ASSERT(0UL == fixedpoint_whole_part(objs->one_fourth));
+    ASSERT(0x4b19efceaUL == fixedpoint_whole_part(objs->large1));
+    ASSERT(0xfcbf3d5UL == fixedpoint_whole_part(objs->large2));
+    ASSERT(0UL == fixedpoint_frac_part(objs->zero));
+    ASSERT(0UL == fixedpoint_frac_part(objs->one));
+    ASSERT(0x8000000000000000UL == fixedpoint_frac_part(objs->one_half));
+    ASSERT(0x4000000000000000UL == fixedpoint_frac_part(objs->one_fourth));
+    ASSERT(0xec9a1e2418UL == fixedpoint_frac_part(objs->large1));
+    ASSERT(0x4d1a23c24fafUL == fixedpoint_frac_part(objs->large2));
 }
 
 void test_add(TestObjs *objs) {
@@ -353,5 +380,3 @@ void test_is_err(TestObjs *objs) {
     Fixedpoint err7 = fixedpoint_create_from_hex("7.0?4");
     ASSERT(fixedpoint_is_err(err7));
 }
-
-// TODO: implement more test functions
