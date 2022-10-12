@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include <functions.h>
 using std::cout; using std::cin; using std::endl;
 using std::cerr;
 
