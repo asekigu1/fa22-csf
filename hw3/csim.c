@@ -1,6 +1,7 @@
+#include <iostream>
 #include <stdio.h>
 #include <ctype.h>
-#include <iostream>
+
 
 using std::cout; using std::cin; using std::endl;
 using std::cerr;
