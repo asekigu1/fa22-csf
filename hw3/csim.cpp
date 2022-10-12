@@ -1,10 +1,26 @@
 #include <iostream>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 
 using std::cout; using std::cin; using std::endl;
 using std::cerr;
+
+int is_power_of_2(int n){
+    //while n is even keep on dividing by 2
+    while (n % 2 == 0) {
+        n = n /2;
+    }
+    //n is now odd, if it is 1 then it is a power of 2, any other odd number means it wasn't
+    if (n == 1){
+        return 1;
+    }
+    else {
+        return 0;
+    }
+
+}
 
 
 int main(int argc, char * argv[]) {
@@ -19,7 +35,7 @@ int main(int argc, char * argv[]) {
     int num_sets = atoi(argv[1]);
     int num_blocks = atoi(argv[2]);
     int num_bytes = atoi(argv[3]);
-    if () {
+    if ((is_power_of_2(num_sets) == 0) || (is_power_of_2(num_blocks == 0) || (num_blocks < 4)))  {
         cerr << "Invalid parameter in validation of num_sets to num_bytes";
         return 1;
     }
@@ -28,32 +44,32 @@ int main(int argc, char * argv[]) {
     bool write_allocate;
     bool write_through;
     
-    if (argv[4] == "write-allocate") {
+    if (strcmp(argv[4],"write-allocate") == 0) {
         write_allocate = true;
-    } else if (argv[4] == "no-write-allocate") {
+    } else if (strcmp(argv[4],"no-write-allocate") == 0) {
         write_allocate = false;
     } else {
         cerr << "Invalid parameter in write-allocate";
         return 1;
     }
-    if (argv[5] == "write-through") {
+    if (strcmp(argv[5],"write-through") == 0) {
         write_through = true;
-    } else if (argv[5] == "write-back") {
+    } else if (strcmp(argv[5], "write-back") == 0) {
         write_through = false;
     } else {
         cerr << "Invalid parameter in write-through";
         return 1;
     }
-    if (!write_allocate && !write_thru) {
+    if (!write_allocate && !write_through) {
         cerr << "Cannot pass no-write-allocate and write-back";
         return 1;
     }
 
     //  validate eviction
     bool lru;
-    if (argv[6] == "lru") {
+    if (strcmp(argv[6],"lru") == 0) {
         lru = true;
-    } else if (argv[6] == "fifo") {
+    } else if (strcmp(argv[6],"fifo")) {
         lru = false;
     } else {
         cerr << "Invalid parameter in eviction";

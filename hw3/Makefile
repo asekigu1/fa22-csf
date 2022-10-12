@@ -8,8 +8,8 @@ CFLAGS = $(CONSERVATIVE_FLAGS) $(DEBUGGING_FLAGS)
 csim: csim.o functions.o
 	$(CXX) -o csim csim.o functions.o
 
-csim.o: csim.c functions.h
-	$(CXX) -c csim.c $(CFLAGS)
+csim.o: csim.cpp functions.h
+	$(CXX) -c csim.cpp $(CFLAGS)
 
 functions.o: functions.c functions.h
 	$(CXX) $(CFLAGS) -c functions.c
