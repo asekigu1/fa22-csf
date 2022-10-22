@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-
+#include <vector>
 
 using std::cout; using std::cin; using std::endl;
-using std::cerr;
+using std::cerr; using std::vector;
 
 int is_power_of_2(int n){
     //while n is even keep on dividing by 2
@@ -21,6 +21,23 @@ int is_power_of_2(int n){
     }
 
 }
+
+class Slot {
+    uint32_t tag;
+    bool valid;
+    uint32_t time_stamp;
+
+};
+
+class Set {
+    vector<Slot> slots;
+};
+
+class Cache {
+    vector<Set> sets;
+};
+
+
 
 
 int main(int argc, char * argv[]) {
@@ -69,13 +86,16 @@ int main(int argc, char * argv[]) {
     bool lru;
     if (strcmp(argv[6],"lru") == 0) {
         lru = true;
-    } else if (strcmp(argv[6],"fifo")) {
+    } else if (strcmp(argv[6],"fifo") == 0) {
         lru = false;
     } else {
         cerr << "Invalid parameter in eviction";
         return 1;
     }
+    
+
   
+    
   
 
     return 0;
