@@ -3,14 +3,16 @@
 #include <ctype.h>
 #include <string.h>
 #include <vector>
+#include <sstream>
 
 using std::cout; using std::cin; using std::endl;
-using std::cerr; using std::vector;
+using std::cerr; using std::vector; using std::string;
 
 int is_power_of_2(int n){
     //while n is even keep on dividing by 2
     while (n % 2 == 0) {
         n = n /2;
+        //cout << n << endl;
     }
     //n is now odd, if it is 1 then it is a power of 2, any other odd number means it wasn't
     if (n == 1){
@@ -22,18 +24,19 @@ int is_power_of_2(int n){
 
 }
 
-class Slot {
+struct Slot {
     uint32_t tag;
+    uint32_t index;
     bool valid;
     uint32_t time_stamp;
 
 };
 
-class Set {
+struct Set {
     vector<Slot> slots;
 };
 
-class Cache {
+struct Cache {
     vector<Set> sets;
 };
 
@@ -47,16 +50,18 @@ int main(int argc, char * argv[]) {
         cerr << "Invalid number of arguments" << endl;
         return 1;
     }
-
+   
     //  validate number of sets is a positive power of 2
     int num_sets = atoi(argv[1]);
     int num_blocks = atoi(argv[2]);
     int num_bytes = atoi(argv[3]);
-    if ((is_power_of_2(num_sets) == 0) || (is_power_of_2(num_blocks == 0) || (num_blocks < 4)))  {
+    
+    if ((is_power_of_2(num_sets) == 0) || (is_power_of_2(num_blocks) == 0 || (num_blocks < 4)))  {
         cerr << "Invalid parameter in validation of num_sets to num_bytes";
         return 1;
     }
-
+    
+    
     //  validate write-allocate and write-through modes
     bool write_allocate;
     bool write_through;
@@ -81,7 +86,7 @@ int main(int argc, char * argv[]) {
         cerr << "Cannot pass no-write-allocate and write-back";
         return 1;
     }
-
+    
     //  validate eviction
     bool lru;
     if (strcmp(argv[6],"lru") == 0) {
@@ -92,7 +97,34 @@ int main(int argc, char * argv[]) {
         cerr << "Invalid parameter in eviction";
         return 1;
     }
+    cout << "BEfore sets" << endl;
+    Cache cache;
+    vector<Set> v(num_sets);
+    cache.sets = v;
+    Set set;
+    vector<Slot> v1(num_blocks);
+    set.slots = v1;
     
+
+    string line;
+    
+    while (std::getline(cin, line)){
+        //get if load or store
+        string operation;
+        std::stringstream ss(line);
+        ss >> operation;
+        //get the address
+        cout << operation << endl;
+        string address;
+        ss >> address;
+        
+        
+        
+    }
+
+
+
+
 
   
     
