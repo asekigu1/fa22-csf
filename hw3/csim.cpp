@@ -4,41 +4,12 @@
 #include <string.h>
 #include <vector>
 #include <sstream>
+#include <bitset>
+#include "helper_functions.h"
 
 using std::cout; using std::cin; using std::endl;
-using std::cerr; using std::vector; using std::string;
+using std::cerr; using std::vector; using std::string; using std::stringstream;
 
-int is_power_of_2(int n){
-    //while n is even keep on dividing by 2
-    while (n % 2 == 0) {
-        n = n /2;
-        //cout << n << endl;
-    }
-    //n is now odd, if it is 1 then it is a power of 2, any other odd number means it wasn't
-    if (n == 1){
-        return 1;
-    }
-    else {
-        return 0;
-    }
-
-}
-
-struct Slot {
-    uint32_t tag;
-    uint32_t index;
-    bool valid;
-    uint32_t time_stamp;
-
-};
-
-struct Set {
-    vector<Slot> slots;
-};
-
-struct Cache {
-    vector<Set> sets;
-};
 
 
 
@@ -97,7 +68,7 @@ int main(int argc, char * argv[]) {
         cerr << "Invalid parameter in eviction";
         return 1;
     }
-    cout << "BEfore sets" << endl;
+    
     Cache cache;
     vector<Set> v(num_sets);
     cache.sets = v;
@@ -111,12 +82,23 @@ int main(int argc, char * argv[]) {
     while (std::getline(cin, line)){
         //get if load or store
         string operation;
-        std::stringstream ss(line);
+        stringstream ss(line);
         ss >> operation;
         //get the address
-        cout << operation << endl;
+        //cout << operation << endl;
         string address;
         ss >> address;
+        //convert to number
+        stringstream s2;
+        s2 << std::hex << address;
+        uint32_t num;
+        s2 >> num;
+        cout << get_tag(num,num_sets, num_blocks) << endl;
+
+        
+        if (write_allocate == true && write_through == false) {
+            
+        }
         
         
         
