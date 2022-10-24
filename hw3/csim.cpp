@@ -123,15 +123,19 @@ int main(int argc, char * argv[]) {
                 for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                     
                     
-                    if ((cache.sets[i].slots[j].valid == true) && (cache.sets[i].slots[j].tag == address_tag)) {
+                    if ((cache.sets[i].slots[j].valid == true) && (cache.sets[i].slots[j].tag == address_tag) && (cache.sets[i].slots[j].index == address_index)) {
                         //if we have a read hit
-                        cache.sets[i].slots[j].index = address_index;
+                       
+                        
                         read_hit = 1;
                         std::time_t t = std::time(0);
                         cache.sets[i].slots[j].time_stamp = (uint32_t) t;
                         load_hits++;
                         break_outer = 1;
                         break;
+                        
+                        
+                        
                         
 
 
@@ -143,6 +147,7 @@ int main(int argc, char * argv[]) {
                 if (break_outer == 1) {
                     break;
                 }
+               
             }
             //we have a read miss, attempt to find empty slot
             int full_cache = 1;
@@ -181,8 +186,8 @@ int main(int argc, char * argv[]) {
                 if (full_cache == 1) {
                     //set first slot as the min
                     uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                    int i_coord;
-                    int j_coord;
+                    int i_coord = 0;
+                    int j_coord = 0;
                     //iterate through to find min using LRU
                     for (size_t i = 0; i < cache.sets.size(); i++) {
                         for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
@@ -296,8 +301,8 @@ int main(int argc, char * argv[]) {
                     //slots were full eject least recently used
                     if (full_cache == 1) {
                         uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                        int i_coord;
-                        int j_coord;
+                        int i_coord = 0;
+                        int j_coord = 0;
                         for (size_t i = 0; i < cache.sets.size(); i++) {
                             for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                                 
@@ -387,8 +392,8 @@ int main(int argc, char * argv[]) {
                         //find lru
                         uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
                         
-                        int i_coord;
-                        int j_coord;
+                        int i_coord = 0;
+                        int j_coord = 0;
                         for (size_t i = 0; i < cache.sets.size(); i++) {
                             for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                                 
