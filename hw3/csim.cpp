@@ -121,14 +121,14 @@ int main(int argc, char * argv[]) {
             for (size_t i = 0; i < cache.sets.size(); i++) {
                 int break_outer = 0;
                 for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                    Slot current_slot = cache.sets[i].slots[j];
                     
-                    if ((current_slot.tag == address_tag)) {
+                    
+                    if ((cache.sets[i].slots[j].valid == true) && (cache.sets[i].slots[j].tag == address_tag)) {
                         //if we have a read hit
-                        current_slot.index = address_index;
+                        cache.sets[i].slots[j].index = address_index;
                         read_hit = 1;
                         std::time_t t = std::time(0);
-                        current_slot.time_stamp = (uint32_t) t;
+                        cache.sets[i].slots[j].time_stamp = (uint32_t) t;
                         load_hits++;
                         break_outer = 1;
                         break;
@@ -152,15 +152,15 @@ int main(int argc, char * argv[]) {
                 for (size_t i = 0; i < cache.sets.size(); i++) {
                     int break_outer = 0;
                     for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                        Slot current_slot = cache.sets[i].slots[j];
+                        
                 
-                        if (current_slot.valid == false) {
+                        if (cache.sets[i].slots[j].valid == false) {
                         //read miss, if there is an empty slot fill it
-                            current_slot.valid = true;
-                            current_slot.tag = address_tag;
-                            current_slot.index = address_index;
+                            cache.sets[i].slots[j].valid = true;
+                            cache.sets[i].slots[j].tag = address_tag;
+                            cache.sets[i].slots[j].index = address_index;
                             std::time_t t = std::time(0);
-                            current_slot.time_stamp = (uint32_t) t;
+                            cache.sets[i].slots[j].time_stamp = (uint32_t) t;
                             
                             full_cache = 0;
                             break_outer = 1;
@@ -176,41 +176,38 @@ int main(int argc, char * argv[]) {
                 
                 
                 }   
-
-
-
-            
-            }
-            //no empty spaces, find slot to eject
-            if (full_cache == 1) {
-                //set first slot as the min
-                uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                int i_coord;
-                int j_coord;
-                //iterate through to find min using LRU
-                for (size_t i = 0; i < cache.sets.size(); i++) {
-                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                        Slot current_slot = cache.sets[i].slots[j];
-                        if (current_slot.time_stamp < min_time_stamp) {
-                            min_time_stamp = current_slot.time_stamp;
-                            i_coord = i;
-                            j_coord = j;
-                        }
-                    }
-
-                } 
-                //replace slot
-                cache.sets[i_coord].slots[j_coord].index = address_tag;
-                cache.sets[i_coord].slots[j_coord].index = address_index;
-                std::time_t t = std::time(0);
-                cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
-
-
                 
-                        
-            
+                //no empty spaces, find slot to eject
+                if (full_cache == 1) {
+                    //set first slot as the min
+                    uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
+                    int i_coord;
+                    int j_coord;
+                    //iterate through to find min using LRU
+                    for (size_t i = 0; i < cache.sets.size(); i++) {
+                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                            
+                            if (cache.sets[i].slots[j].time_stamp < min_time_stamp) {
+                                min_time_stamp = cache.sets[i].slots[j].time_stamp;
+                                i_coord = i;
+                                j_coord = j;
+                            }
+                        }
+
+                    } 
+                    //replace slot
+                    cache.sets[i_coord].slots[j_coord].index = address_tag;
+                    cache.sets[i_coord].slots[j_coord].index = address_index;
+                    std::time_t t = std::time(0);
+                    cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
 
 
+                    
+                            
+                
+
+
+                }
             }
         }
         if (operation == "s") {
@@ -221,8 +218,8 @@ int main(int argc, char * argv[]) {
                 for (size_t i = 0; i < cache.sets.size(); i++) {
                     int break_outer = 0;
                     for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                        Slot current_slot = cache.sets[i].slots[j];
-                        if (current_slot.tag == address_tag) {
+                        
+                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag) {
                             hit = 1;
                             store_hits++;
                             //write immediately to memory
@@ -253,8 +250,8 @@ int main(int argc, char * argv[]) {
                 for (size_t i = 0; i < cache.sets.size(); i++) {
                     int break_outer = 0;
                     for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                        Slot current_slot = cache.sets[i].slots[j];
-                        if (current_slot.tag == address_tag) {
+                        
+                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag) {
                             hit = 1;
                             store_hits++;
                             //write immediately to memory
@@ -274,14 +271,14 @@ int main(int argc, char * argv[]) {
                     for (size_t i = 0; i < cache.sets.size(); i++) {
                         int break_outer = 0;
                         for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                            Slot current_slot = cache.sets[i].slots[j];
-                            if (current_slot.valid == false) {
+                            
+                            if (cache.sets[i].slots[j].valid == false) {
                             //if there is an empty slot fill it
-                            current_slot.valid = true;
-                            current_slot.tag = address_tag;
-                            current_slot.index = address_index;
+                            cache.sets[i].slots[j].valid = true;
+                            cache.sets[i].slots[j].tag = address_tag;
+                            cache.sets[i].slots[j].index = address_index;
                             std::time_t t = std::time(0);
-                            current_slot.time_stamp = (uint32_t) t;
+                            cache.sets[i].slots[j].time_stamp = (uint32_t) t;
                         
                             full_cache = 0;
                             break_outer = 1;
@@ -302,8 +299,8 @@ int main(int argc, char * argv[]) {
                         for (size_t i = 0; i < cache.sets.size(); i++) {
                             for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                                 
-                                Slot current_slot = cache.sets[i].slots[j];
-                                if (current_slot.time_stamp < min_time_stamp) {
+                               
+                                if (cache.sets[i].slots[j].time_stamp < min_time_stamp) {
                                     i_coord = i;
                                     j_coord = j;
                                 }
@@ -313,12 +310,12 @@ int main(int argc, char * argv[]) {
                             }   
 
                         }
-                        Slot LRU = cache.sets[i_coord].slots[j_coord];
-                        LRU.valid = true;
-                        LRU.tag = address_tag;
-                        LRU.index = address_index;
+                        
+                        cache.sets[i_coord].slots[j_coord].valid = true;
+                        cache.sets[i_coord].slots[j_coord].tag = address_tag;
+                        cache.sets[i_coord].slots[j_coord].index = address_index;
                         std::time_t t = std::time(0);
-                        LRU.time_stamp = (uint32_t) t;
+                        cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
 
 
 
@@ -339,11 +336,11 @@ int main(int argc, char * argv[]) {
                 for (size_t i = 0; i < cache.sets.size(); i++) {
                     int break_outer = 0;
                     for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                        Slot current_slot = cache.sets[i].slots[j];
-                        if (current_slot.tag == address_tag) {
+                        
+                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag) {
                             hit = 1;
                             store_hits++;
-                            current_slot.dirty = 1;
+                            cache.sets[i].slots[j].dirty = 1;
                             break_outer = 1;
                             break;
                         }
@@ -362,37 +359,38 @@ int main(int argc, char * argv[]) {
                     for (size_t i = 0; i < cache.sets.size(); i++) {
                         int break_outer = 0;
                         for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                            Slot current_slot = cache.sets[i].slots[j];
-                            if (current_slot.valid == false) {
+                            
+                            if (cache.sets[i].slots[j].valid == false) {
                                 //if there is an empty slot fill it
-                                current_slot.valid = true;
-                                current_slot.tag = address_tag;
-                                current_slot.index = address_index;
+                                cache.sets[i].slots[j].valid = true;
+                                cache.sets[i].slots[j].tag = address_tag;
+                                cache.sets[i].slots[j].index = address_index;
                                 std::time_t t = std::time(0);
-                                current_slot.time_stamp = (uint32_t) t;
+                                cache.sets[i].slots[j].time_stamp = (uint32_t) t;
                             
                                 full_cache = 0;
                                 break_outer = 1;
                                 break;
                 
                             }
-                            if (break_outer == 1) {
-                                break;
-                            }
+                            
 
+                        }
+                        if (break_outer == 1) {
+                                break;
                         }
                     }
                     if (full_cache == 1) {
                         //find lru
                         uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                        Slot ejected_slot;
+                        
                         int i_coord;
                         int j_coord;
                         for (size_t i = 0; i < cache.sets.size(); i++) {
                             for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                                 
-                                Slot current_slot = cache.sets[i].slots[j];
-                                if (current_slot.time_stamp < min_time_stamp) {
+                                
+                                if (cache.sets[i].slots[j].time_stamp < min_time_stamp) {
                                    i_coord = i;
                                    j_coord = j;
                                 }
@@ -402,15 +400,15 @@ int main(int argc, char * argv[]) {
                             }   
 
                         }
-                        ejected_slot = cache.sets[i_coord].slots[j_coord];
-                        ejected_slot.valid = true;
-                        ejected_slot.tag = address_tag;
-                        ejected_slot.index = address_index;
+                        
+                        cache.sets[i_coord].slots[j_coord].valid = true;
+                        cache.sets[i_coord].slots[j_coord].tag = address_tag;
+                        cache.sets[i_coord].slots[j_coord].index = address_index;
                         std::time_t t = std::time(0);
-                        ejected_slot.time_stamp = (uint32_t) t;
+                        cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
                         
                         //check if ejected slot was dirty and needs to be written to memory
-                        if (ejected_slot.dirty == 1) {
+                        if (cache.sets[i_coord].slots[j_coord].dirty == 1) {
                             stores_to_memory++;
                         }
 
