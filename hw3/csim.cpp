@@ -192,55 +192,124 @@ int main(int argc, char * argv[]) {
 
 
             }
-            if (operation == "s") {
+        if (operation == "s") {
+            total_stores++;
+            int hit = 0;
+            //write through, no-write-allocate
+            if ((write_through == true) && write_allocate == false) {
+                for (size_t i = 0; i < cache.sets.size(); i++) {
+                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                        Slot current_slot = cache.sets[i].slots[j];
+                        if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
+                            hit = 1;
+                            store_hits++;
+                            //write immediately to memory
+                            stores_to_memory++;
+                        }
+                    }
+
+                }
+
+                //no write allocate
+            
+                if (hit == 0) {
+                    store_misses++;
+                    stores_to_memory++;
+                }
+            }
+            if ((write_through == true) && write_allocate == true) {
                 total_stores++;
                 int hit = 0;
-                //write through, no-write-allocate
-                if ((write_through == true) && write_allocate == false) {
-                    for (size_t i = 0; i < cache.sets.size(); i++) {
-                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                            Slot current_slot = cache.sets[i].slots[j];
-                            if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
-                                hit = 1;
-                                store_hits++;
-                                //write immediately to memory
-                                stores_to_memory++;
-                            }
+                //write through, write-allocate
+                for (size_t i = 0; i < cache.sets.size(); i++) {
+                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                        Slot current_slot = cache.sets[i].slots[j];
+                        if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
+                            hit = 1;
+                            store_hits++;
+                            //write immediately to memory
+                            stores_to_memory++;
                         }
-
                     }
 
-                    //no write allocate
-                
-                    if (hit == 0) {
-                        store_misses++;
-                        stores_to_memory++;
-                    }
                 }
-                if ((write_through == true) && write_allocate == true) {
-                    total_stores++;
-                    int hit = 0;
-                    //write through, write-allocate
+                if (hit == 0) {
+                    store_misses++;
+                    int full_cache = 1;
+                    //we missed, first check if there is an empty slot to fill
                     for (size_t i = 0; i < cache.sets.size(); i++) {
                         for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                             Slot current_slot = cache.sets[i].slots[j];
-                            if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
-                                hit = 1;
-                                store_hits++;
-                                //write immediately to memory
-                                stores_to_memory++;
+                            if (current_slot.valid == false) {
+                            //if there is an empty slot fill it
+                            current_slot.valid = true;
+                            current_slot.tag = address_tag;
+                            current_slot.index = address_index;
+                            std::time_t t = std::time(0);
+                            current_slot.time_stamp = (uint32_t) t;
+                        
+                            full_cache = 0;
+                
                             }
-                        }
 
+                        }
                     }
-                    if (hit == 0) {
-                        store_misses++;
-                        int full_cache = 1;
-                        //we missed, first check if there is an empty slot to fill
+                    //slots were full eject least recently used
+                    if (full_cache == 1) {
+                        uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
+                        
                         for (size_t i = 0; i < cache.sets.size(); i++) {
                             for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                                
                                 Slot current_slot = cache.sets[i].slots[j];
-                                if (current_slot.valid == false) {
+                                if (current_slot.time_stamp < min_time_stamp) {
+                                    //if there is an empty slot fill it
+                                    current_slot.valid = true;
+                                    current_slot.tag = address_tag;
+                                    current_slot.index = address_index;
+                                    std::time_t t = std::time(0);
+                                    current_slot.time_stamp = (uint32_t) t;
+                                }
+                                
+                                    
+                    
+                            }   
+
+                        }
+                    }
+
+                    
+
+                }
+
+            }
+            if ((write_through == false) && (write_allocate == true)) {
+                //write back and write allocate
+
+                //hit case
+                total_stores++;
+                int hit = 0;
+                //write through, write-allocate
+                for (size_t i = 0; i < cache.sets.size(); i++) {
+                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                        Slot current_slot = cache.sets[i].slots[j];
+                        if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
+                            hit = 1;
+                            store_hits++;
+                            current_slot.dirty = 1;
+                        }
+                    }
+
+                }
+                if (hit == 0) {
+                    store_misses++;
+                    //write allocate
+                    int full_cache = 1;
+                    //we missed, first check if there is an empty slot to fill
+                    for (size_t i = 0; i < cache.sets.size(); i++) {
+                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                            Slot current_slot = cache.sets[i].slots[j];
+                            if (current_slot.valid == false) {
                                 //if there is an empty slot fill it
                                 current_slot.valid = true;
                                 current_slot.tag = address_tag;
@@ -249,130 +318,61 @@ int main(int argc, char * argv[]) {
                                 current_slot.time_stamp = (uint32_t) t;
                             
                                 full_cache = 0;
-                    
-                                }
-
+                
                             }
+
                         }
-                        //slots were full eject least recently used
-                        if (full_cache == 1) {
-                            uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                            
-                            for (size_t i = 0; i < cache.sets.size(); i++) {
-                                for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                                    
-                                    Slot current_slot = cache.sets[i].slots[j];
-                                    if (current_slot.time_stamp < min_time_stamp) {
-                                        //if there is an empty slot fill it
-                                        current_slot.valid = true;
-                                        current_slot.tag = address_tag;
-                                        current_slot.index = address_index;
-                                        std::time_t t = std::time(0);
-                                        current_slot.time_stamp = (uint32_t) t;
-                                    }
-                                    
-                                        
-                        
-                                }   
-
-                            }
-                        }
-
-                        
-
                     }
-
-                }
-                if ((write_through == false) && (write_allocate == true)) {
-                    //write back and write allocate
-
-                    //hit case
-                    total_stores++;
-                    int hit = 0;
-                    //write through, write-allocate
-                    for (size_t i = 0; i < cache.sets.size(); i++) {
-                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                            Slot current_slot = cache.sets[i].slots[j];
-                            if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
-                                hit = 1;
-                                store_hits++;
-                                current_slot.dirty = 1;
-                            }
-                        }
-
-                    }
-                    if (hit == 0) {
-                        store_misses++;
-                        //write allocate
-                        int full_cache = 1;
-                        //we missed, first check if there is an empty slot to fill
+                    if (full_cache == 1) {
+                        //find lru
+                        uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
+                        Slot ejected_slot;
                         for (size_t i = 0; i < cache.sets.size(); i++) {
                             for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                                
                                 Slot current_slot = cache.sets[i].slots[j];
-                                if (current_slot.valid == false) {
+                                if (current_slot.time_stamp < min_time_stamp) {
                                     //if there is an empty slot fill it
+                                    ejected_slot = current_slot;
                                     current_slot.valid = true;
                                     current_slot.tag = address_tag;
                                     current_slot.index = address_index;
                                     std::time_t t = std::time(0);
                                     current_slot.time_stamp = (uint32_t) t;
-                                
-                                    full_cache = 0;
-                    
+                                    
                                 }
+                                
+                                    
+                    
+                            }   
 
-                            }
                         }
-                        if (full_cache == 1) {
-                            //find lru
-                            uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                            Slot ejected_slot;
-                            for (size_t i = 0; i < cache.sets.size(); i++) {
-                                for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                                    
-                                    Slot current_slot = cache.sets[i].slots[j];
-                                    if (current_slot.time_stamp < min_time_stamp) {
-                                        //if there is an empty slot fill it
-                                        ejected_slot = current_slot;
-                                        current_slot.valid = true;
-                                        current_slot.tag = address_tag;
-                                        current_slot.index = address_index;
-                                        std::time_t t = std::time(0);
-                                        current_slot.time_stamp = (uint32_t) t;
-                                        
-                                    }
-                                    
-                                        
-                        
-                                }   
-
-                            }
-                            //check if ejected slot was dirty and needs to be written to memory
-                            if (ejected_slot.dirty == 1) {
-                                stores_to_memory++;
-                            }
-
+                        //check if ejected slot was dirty and needs to be written to memory
+                        if (ejected_slot.dirty == 1) {
+                            stores_to_memory++;
                         }
 
                     }
 
-
-
                 }
-                
-                
 
 
 
-            
-            
             }
+            
+            
+
+
 
         
-        
-            
         
         }
+
+    
+    
+        
+    
+    }
 
 
             
