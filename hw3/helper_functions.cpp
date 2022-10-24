@@ -29,62 +29,7 @@ int is_power_of_2(int n){
     }
 
 }
-/*
-string convert_hex_to_binary (string hex) {
-    string bin = "";
-    for (size_t i = 2; i < hex.size(); i++) {
-        if (hex[i] == '0') {
-            bin += "0000";
-        }
-        else if (hex[i] == '1') {
-            bin += "0001";
-        }
-        else if (hex[i] == '2') {
-            bin += "0010";
-        }
-        else if (hex[i] == '3') {
-            bin += "0011";
-        }
-        else if (hex[i] == '4') {
-            bin += "0100";
-        }
-        else if (hex[i] == '5') {
-            bin += "0101";
-        }
-        else if (hex[i] == '6') {
-            bin += "0110";
-        }
-        else if (hex[i] == '7') {
-            bin += "0111";
-        }
-        else if (hex[i] == '8') {
-            bin += "1000";
-        }
-        else if (hex[i] == '9') {
-            bin += "1001";
-        }
-        else if (hex[i] == 'a' || hex[i] == 'A') {
-            bin += "1010";
-        }
-        else if (hex[i] == 'b' || hex[i] == 'B') {
-            bin += "1011";
-        }
-        else if (hex[i] == 'c' || hex[i] == 'C') {
-            bin += "1100";
-        }
-        else if (hex[i] == 'd' || hex[i] == 'D') {
-            bin += "1101";
-        }
-        else if (hex[i] == 'e' || hex[i] == 'E') {
-            bin += "1110";
-        }
-        else if (hex[i] == 'f' || hex[i] == 'F') {
-            bin += "1111";
-        }
-    }
-    return bin;
-}
-*/
+
 
 int log_2(int num) {
     int count = 0;
@@ -99,7 +44,7 @@ int log_2(int num) {
 uint32_t get_tag(uint32_t num, uint32_t set_size, uint32_t block_size) {
     uint32_t log2_set_size = log_2(set_size);
     uint32_t log2_block_size = log_2(block_size);
-    num = num >> log2_block_size+log2_block_size; 
+    num = num >> (log2_set_size+log2_block_size); 
     return num;
 }
 
@@ -108,9 +53,10 @@ uint32_t get_index(uint32_t num, uint32_t set_size, uint32_t block_size) {
     uint32_t log2_block_size = log_2(block_size);
     uint32_t tag_digits = 32-log2_block_size-log2_set_size;
     num = num << tag_digits;
-    num = num >> tag_digits+log2_block_size;
+    num = num >> (tag_digits+log2_block_size);
     return num;
     
     
 
 }
+

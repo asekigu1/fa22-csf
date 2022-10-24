@@ -5,20 +5,22 @@
 #include <vector>
 #include <sstream>
 #include <bitset>
+#include <map>
 
 using std::cout; using std::cin; using std::endl;
-using std::cerr; using std::vector; using std::string;
+using std::cerr; using std::vector; using std::string; using std::map;
 
 struct Slot {
     uint32_t tag;
     uint32_t index;
-    bool valid;
+    bool valid = false;
     uint32_t time_stamp;
 
 };
 
 struct Set {
     vector<Slot> slots;
+    std::map<unsigned, unsigned> index; // map of tag to index of slot
 };
 
 struct Cache {

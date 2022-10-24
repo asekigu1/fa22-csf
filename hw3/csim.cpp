@@ -7,6 +7,7 @@
 #include <bitset>
 #include "helper_functions.h"
 
+
 using std::cout; using std::cin; using std::endl;
 using std::cerr; using std::vector; using std::string; using std::stringstream;
 
@@ -72,10 +73,13 @@ int main(int argc, char * argv[]) {
     Cache cache;
     vector<Set> v(num_sets);
     cache.sets = v;
+    cout << "# of sets " << cache.sets.size() << endl; 
     Set set;
     vector<Slot> v1(num_blocks);
     set.slots = v1;
     
+    
+
 
     string line;
     
@@ -93,12 +97,15 @@ int main(int argc, char * argv[]) {
         s2 << std::hex << address;
         uint32_t num;
         s2 >> num;
-        cout << get_tag(num,num_sets, num_blocks) << endl;
+        
+        for (vector<Set>::iterator it = cache.sets.begin(); it != cache.sets.end(); ++it) {
+            for (vector<Slot>::iterator it2 = it->slots.begin(); it2 != it->slots.end(); ++it) {
+                cout << "Working" << endl;
+            }
+        }
 
         
-        if (write_allocate == true && write_through == false) {
-            
-        }
+       
         
         
         
