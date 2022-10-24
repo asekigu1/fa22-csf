@@ -15,6 +15,7 @@ struct Slot {
     uint32_t index;
     bool valid = false;
     uint32_t time_stamp;
+    int dirty = 0;
 
 };
 
