@@ -73,10 +73,28 @@ int main(int argc, char * argv[]) {
     Cache cache;
     vector<Set> v(num_sets);
     cache.sets = v;
-    cout << "# of sets " << cache.sets.size() << endl; 
-    Set set;
-    vector<Slot> v1(num_blocks);
-    set.slots = v1;
+    
+    for (vector<Set>::iterator it = cache.sets.begin(); it != cache.sets.end(); ++it) {
+        
+        vector<Slot> v1(num_blocks);
+        
+        it->slots = v1;
+        
+    }
+    cout << "# of sets " << cache.sets[0].slots.size() << endl; 
+    
+    int count = 0;
+    for (size_t i = 0; i < cache.sets.size(); i++) {
+        cout << "-----" << endl;
+        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+            cout << count << endl;
+            count++;
+        }
+        
+       
+    }
+    
+    cout << "Count " << count << endl;
     
     
 
@@ -97,13 +115,55 @@ int main(int argc, char * argv[]) {
         s2 << std::hex << address;
         uint32_t num;
         s2 >> num;
-        
-        for (vector<Set>::iterator it = cache.sets.begin(); it != cache.sets.end(); ++it) {
-            for (vector<Slot>::iterator it2 = it->slots.begin(); it2 != it->slots.end(); ++it) {
-                cout << "Working" << endl;
-            }
-        }
+        uint32_t address_tag= get_tag(num, num_sets, num_blocks);
+        uint32_t address_index = get_index(num, num_sets, num_blocks);
+            
 
+    if (operation == "l") {
+    int read_hit = 0;
+    for (size_t i = 0; i < cache.sets.size(); i++) {
+        
+        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+            Slot current_slot = cache.sets[i].slots[j];
+            
+            if ((current_slot.valid == true) && (current_slot.tag == address_tag)) {
+                //read hit
+                current_slot.index = address_index;
+                read_hit = 1;
+
+
+            }
+
+        
+        }
+    }
+
+        if (read_hit == 0) {
+            for (size_t i = 0; i < cache.sets.size(); i++) {
+                for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                    Slot current_slot = cache.sets[i].slots[j];
+            
+                    if (current_slot.valid == false) {
+                    //read miss
+                        current_slot.valid = true;
+                        current_slot.tag = address_tag;
+                        current_slot.index = address_index;
+                
+
+
+                    }
+            }   }
+        
+        }       
+
+    
+    
+        
+       
+    }
+
+
+        
         
        
         
