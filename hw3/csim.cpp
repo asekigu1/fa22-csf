@@ -6,6 +6,7 @@
 #include <sstream>
 #include <bitset>
 #include "helper_functions.h"
+#include <ctime>
 
 
 using std::cout; using std::cin; using std::endl;
@@ -81,23 +82,14 @@ int main(int argc, char * argv[]) {
         it->slots = v1;
         
     }
-    cout << "# of sets " << cache.sets[0].slots.size() << endl; 
-    
-    int count = 0;
-    for (size_t i = 0; i < cache.sets.size(); i++) {
-        cout << "-----" << endl;
-        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-            cout << count << endl;
-            count++;
-        }
-        
-       
-    }
-    
-    cout << "Count " << count << endl;
+    int total_loads = 0;
+    int total_stores = 0;
+    int load_hits = 0;
+    int load_misses = 0;
+    int store_hits = 0;
+    int store_misses = 0;
     
     
-
 
     string line;
     
@@ -120,16 +112,22 @@ int main(int argc, char * argv[]) {
             
 
     if (operation == "l") {
+    //when we have a load
+    total_loads++;
     int read_hit = 0;
+    //iterate through sets and slots
     for (size_t i = 0; i < cache.sets.size(); i++) {
         
         for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
             Slot current_slot = cache.sets[i].slots[j];
             
             if ((current_slot.valid == true) && (current_slot.tag == address_tag)) {
-                //read hit
+                //if we have a read hit
                 current_slot.index = address_index;
                 read_hit = 1;
+                std::time_t t = std::time(0);
+                current_slot.time_stamp = (uint32_t) t;
+                load_hits++;
 
 
             }
@@ -137,24 +135,62 @@ int main(int argc, char * argv[]) {
         
         }
     }
-
-        if (read_hit == 0) {
-            for (size_t i = 0; i < cache.sets.size(); i++) {
-                for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                    Slot current_slot = cache.sets[i].slots[j];
-            
-                    if (current_slot.valid == false) {
-                    //read miss
-                        current_slot.valid = true;
-                        current_slot.tag = address_tag;
-                        current_slot.index = address_index;
-                
-
-
-                    }
-            }   }
+    //we have a read miss, attempt to find empty slot
+    int full_cache = 1;
+    if (read_hit == 0) {
+        load_misses++;
+        //iterate through
+        for (size_t i = 0; i < cache.sets.size(); i++) {
+            for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                Slot current_slot = cache.sets[i].slots[j];
         
-        }       
+                if (current_slot.valid == false) {
+                //read miss, if there is an empty slot fill it
+                    current_slot.valid = true;
+                    current_slot.tag = address_tag;
+                    current_slot.index = address_index;
+                    std::time_t t = std::time(0);
+                    current_slot.time_stamp = (uint32_t) t;
+                    
+                    full_cache = 0;
+            
+
+
+                }
+        }   }
+    
+    }
+    //no empty spaces, find slot to eject
+    if (full_cache == 1) {
+        //set first slot as the min
+        uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
+        int i_coord;
+        int j_coord;
+        //iterate through to find min using LRU
+        for (size_t i = 0; i < cache.sets.size(); i++) {
+            for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                Slot current_slot = cache.sets[i].slots[j];
+                if (current_slot.time_stamp < min_time_stamp) {
+                    min_time_stamp = current_slot.time_stamp;
+                    i_coord = i;
+                    j_coord = j;
+                }
+            }
+
+        } 
+        //replace slot
+        cache.sets[i_coord].slots[j_coord].index = address_tag;
+        cache.sets[i_coord].slots[j_coord].index = address_index;
+        std::time_t t = std::time(0);
+        cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
+
+
+        
+                
+    
+
+
+    }   
 
     
     
