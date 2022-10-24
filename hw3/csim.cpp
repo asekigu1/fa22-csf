@@ -88,6 +88,7 @@ int main(int argc, char * argv[]) {
     int load_misses = 0;
     int store_hits = 0;
     int store_misses = 0;
+    int stores_to_memory = 0;
     
     
 
@@ -190,7 +191,30 @@ int main(int argc, char * argv[]) {
     
 
 
-    }   
+    }
+    if (operation == "s") {
+        total_stores++;
+        int hit = 0;
+        //write through, no-write-allocate
+        for (size_t i = 0; i < cache.sets.size(); i++) {
+            for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                Slot current_slot = cache.sets[i].slots[j];
+                if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
+                    hit = 1;
+                    //write immediately to memory
+                    stores_to_memory++;
+                }
+            }
+
+        }
+        //no write allocate
+        if (hit == 0) {
+            stores_to_memory++;
+        }
+
+        
+        
+    }
 
     
     
