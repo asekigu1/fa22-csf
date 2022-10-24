@@ -192,8 +192,9 @@ int main(int argc, char * argv[]) {
 
 
             }
+        }
         if (operation == "s") {
-            total_stores++;
+            
             int hit = 0;
             //write through, no-write-allocate
             if ((write_through == true) && write_allocate == false) {
@@ -370,9 +371,9 @@ int main(int argc, char * argv[]) {
 
     
     
+            
         
-    
-    }
+        
 
 
             
