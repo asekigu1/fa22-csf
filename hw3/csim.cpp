@@ -89,8 +89,8 @@ int main(int argc, char * argv[]) {
     int store_hits = 0;
     int store_misses = 0;
     int stores_to_memory = 0;
-    
-    
+    int loads_to_memory = 0;
+    int total_cycles = 0;
 
     string line;
     
@@ -266,6 +266,7 @@ int main(int argc, char * argv[]) {
                 }
                 if (hit == 0) {
                     store_misses++;
+                    stores_to_memory++;
                     int full_cache = 1;
                     //we missed, first check if there is an empty slot to fill
                     for (size_t i = 0; i < cache.sets.size(); i++) {
@@ -353,6 +354,7 @@ int main(int argc, char * argv[]) {
                 }
                 if (hit == 0) {
                     store_misses++;
+                    stores_to_memory++;
                     //write allocate
                     int full_cache = 1;
                     //we missed, first check if there is an empty slot to fill
@@ -442,13 +444,14 @@ int main(int argc, char * argv[]) {
             
             
     }
+    total_cycles = 4*load_hits+100*load_misses+4*store_hits+100*stores_to_memory;
     cout << "Total loads: " << total_loads << endl;
     cout << "Total stores: " << total_stores << endl;
     cout << "Load hits: " << load_hits << endl;
     cout << "Load misses: " << load_misses << endl;
     cout << "Store hits: "<< store_hits << endl;
     cout << "Store misses: " << store_misses <<endl;
-    cout << "Total cycles: " << endl;
+    cout << "Total cycles: " << total_cycles << endl;
 
 
 
