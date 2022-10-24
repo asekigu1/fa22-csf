@@ -196,21 +196,92 @@ int main(int argc, char * argv[]) {
         total_stores++;
         int hit = 0;
         //write through, no-write-allocate
-        for (size_t i = 0; i < cache.sets.size(); i++) {
-            for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                Slot current_slot = cache.sets[i].slots[j];
-                if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
-                    hit = 1;
-                    //write immediately to memory
-                    stores_to_memory++;
+        if ((write_through == true) && write_allocate == false) {
+            for (size_t i = 0; i < cache.sets.size(); i++) {
+                for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                    Slot current_slot = cache.sets[i].slots[j];
+                    if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
+                        hit = 1;
+                        //write immediately to memory
+                        stores_to_memory++;
+                    }
                 }
+
+            }
+
+            //no write allocate
+        
+            if (hit == 0) {
+                stores_to_memory++;
+            }
+        }
+        if ((write_through == true) && write_allocate == true) {
+            total_stores++;
+            int hit = 0;
+            //write through, write-allocate
+            for (size_t i = 0; i < cache.sets.size(); i++) {
+                for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                    Slot current_slot = cache.sets[i].slots[j];
+                    if ( (current_slot.valid == true) && current_slot.tag == address_tag && current_slot.index == address_index) {
+                        hit = 1;
+                        //write immediately to memory
+                        stores_to_memory++;
+                    }
+                }
+
+            }
+            if (hit == 0) {
+                int full_cache = 1;
+                //we missed, first check if there is an empty slot to fill
+                for (size_t i = 0; i < cache.sets.size(); i++) {
+                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                        Slot current_slot = cache.sets[i].slots[j];
+                        if (current_slot.valid == false) {
+                        //if there is an empty slot fill it
+                        current_slot.valid = true;
+                        current_slot.tag = address_tag;
+                        current_slot.index = address_index;
+                        std::time_t t = std::time(0);
+                        current_slot.time_stamp = (uint32_t) t;
+                    
+                        full_cache = 0;
+            
+                        }
+
+                    }
+                }
+                //slots were full eject least recently used
+                if (full_cache == 1) {
+                    uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
+                    
+                    for (size_t i = 0; i < cache.sets.size(); i++) {
+                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                            
+                            Slot current_slot = cache.sets[i].slots[j];
+                            if (current_slot.time_stamp < min_time_stamp) {
+                                //if there is an empty slot fill it
+                                current_slot.valid = true;
+                                current_slot.tag = address_tag;
+                                current_slot.index = address_index;
+                                std::time_t t = std::time(0);
+                                current_slot.time_stamp = (uint32_t) t;
+                            
+                                
+                
+                            }
+
+                    }
+                }
+
+                }
+
             }
 
         }
-        //no write allocate
-        if (hit == 0) {
-            stores_to_memory++;
-        }
+        
+        
+
+
 
         
         
