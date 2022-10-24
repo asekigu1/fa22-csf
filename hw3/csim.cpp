@@ -29,8 +29,8 @@ int main(int argc, char * argv[]) {
     int num_blocks = atoi(argv[2]);
     int num_bytes = atoi(argv[3]);
     
-    if ((is_power_of_2(num_sets) == 0) || (is_power_of_2(num_blocks) == 0 || (num_blocks < 4)))  {
-        cerr << "Invalid parameter in validation of num_sets to num_bytes";
+    if ((is_power_of_2(num_sets) == 0) || (is_power_of_2(num_blocks) == 0 || (num_bytes < 4)))  {
+        cerr << "Invalid parameter in validation of num_sets to num_bytes" << endl;
         return 1;
     }
     
@@ -219,7 +219,7 @@ int main(int argc, char * argv[]) {
                     int break_outer = 0;
                     for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                         
-                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag) {
+                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag && cache.sets[i].slots[j].index == address_index) {
                             hit = 1;
                             store_hits++;
                             //write immediately to memory
@@ -251,13 +251,14 @@ int main(int argc, char * argv[]) {
                     int break_outer = 0;
                     for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
                         
-                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag) {
+                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag && cache.sets[i].slots[j].index == address_index) {
                             hit = 1;
                             store_hits++;
                             //write immediately to memory
                             stores_to_memory++;
                             break_outer = 1;
                         }
+                        
                     }
                     if (break_outer == 1) {
                         break;
