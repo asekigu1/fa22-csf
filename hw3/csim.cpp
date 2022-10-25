@@ -117,94 +117,85 @@ int main(int argc, char * argv[]) {
             //when we have a load
             total_loads++;
             int read_hit = 0;
-            //iterate through sets and slots
-            for (size_t i = 0; i < cache.sets.size(); i++) {
-                int break_outer = 0;
-                for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                    
-                    
-                    if ((cache.sets[i].slots[j].valid == true) && (cache.sets[i].slots[j].tag == address_tag) && (cache.sets[i].slots[j].index == address_index)) {
-                        //if we have a read hit
-                       
-                        
-                        read_hit = 1;
-                        std::time_t t = std::time(0);
-                        cache.sets[i].slots[j].time_stamp = (uint32_t) t;
-                        load_hits++;
-                        break_outer = 1;
-                        break;
-                        
-                        
-                        
-                        
-
-
-
-                    }
-
+            
+            for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
                 
-                }
-                if (break_outer == 1) {
+                
+                if ((cache.sets[address_index].slots[j].valid == true) && (cache.sets[address_index].slots[j].tag == address_tag)) {
+                    //if we have a read hit
+                    
+                    
+                    read_hit = 1;
+                    std::time_t t = std::time(0);
+                    cache.sets[address_index].slots[j].time_stamp = (uint32_t) t;
+                    load_hits++;
+                    
                     break;
+                    
+                    
+                    
+                    
+
+
+
                 }
-               
+
+            
             }
+            
             //we have a read miss, attempt to find empty slot
             int full_cache = 1;
             if (read_hit == 0) {
                 load_misses++;
                 //iterate through
-                for (size_t i = 0; i < cache.sets.size(); i++) {
-                    int break_outer = 0;
-                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                        
                 
-                        if (cache.sets[i].slots[j].valid == false) {
-                        //read miss, if there is an empty slot fill it
-                            cache.sets[i].slots[j].valid = true;
-                            cache.sets[i].slots[j].tag = address_tag;
-                            cache.sets[i].slots[j].index = address_index;
-                            std::time_t t = std::time(0);
-                            cache.sets[i].slots[j].time_stamp = (uint32_t) t;
-                            
-                            full_cache = 0;
-                            break_outer = 1;
-                            break;
+                for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
                     
-
-
-                        }
-                    }
-                    if (break_outer == 1) {
+            
+                    if (cache.sets[address_index].slots[j].valid == false) {
+                    //read miss, if there is an empty slot fill it
+                        cache.sets[address_index].slots[j].valid = true;
+                        cache.sets[address_index].slots[j].tag = address_tag;
+                        cache.sets[address_index].slots[j].index = address_index;
+                        std::time_t t = std::time(0);
+                        cache.sets[address_index].slots[j].time_stamp = (uint32_t) t;
+                        
+                        full_cache = 0;
+                        
                         break;
+                
+
+
                     }
+                }
+                    
                 
                 
-                }   
+                 
                 
                 //no empty spaces, find slot to eject
                 if (full_cache == 1) {
                     //set first slot as the min
-                    uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                    int i_coord = 0;
+                    uint32_t min_time_stamp = cache.sets[address_index].slots[0].time_stamp;
+                    
                     int j_coord = 0;
                     //iterate through to find min using LRU
-                    for (size_t i = 0; i < cache.sets.size(); i++) {
-                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+                  
+                    for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                        
+                        if (cache.sets[address_index].slots[j].time_stamp < min_time_stamp) {
+                            min_time_stamp = cache.sets[address_index].slots[j].time_stamp;
                             
-                            if (cache.sets[i].slots[j].time_stamp < min_time_stamp) {
-                                min_time_stamp = cache.sets[i].slots[j].time_stamp;
-                                i_coord = i;
-                                j_coord = j;
-                            }
+                            j_coord = j;
                         }
+                    }
 
-                    } 
+                    
                     //replace slot
-                    cache.sets[i_coord].slots[j_coord].index = address_tag;
-                    cache.sets[i_coord].slots[j_coord].index = address_index;
+                    cache.sets[address_index].slots[j_coord].index = address_tag;
+                    cache.sets[address_index].slots[j_coord].index = address_index;
                     std::time_t t = std::time(0);
-                    cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
+                    cache.sets[address_index].slots[j_coord].time_stamp = (uint32_t) t;
 
 
                     
@@ -220,26 +211,21 @@ int main(int argc, char * argv[]) {
             int hit = 0;
             //write through, no-write-allocate
             if ((write_through == true) && write_allocate == false) {
-                for (size_t i = 0; i < cache.sets.size(); i++) {
-                    int break_outer = 0;
-                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+            
+                for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                    
+                    if ((cache.sets[address_index].slots[j].valid == true) && cache.sets[address_index].slots[j].tag == address_tag) {
+                        hit = 1;
+                        store_hits++;
+                        //write immediately to memory
+                        stores_to_memory++;
                         
-                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag && cache.sets[i].slots[j].index == address_index) {
-                            hit = 1;
-                            store_hits++;
-                            //write immediately to memory
-                            stores_to_memory++;
-                            break_outer = 1;
-                            break;
-                            
-                        }
-                        
-                    }
-                    if (break_outer == 1) {
                         break;
+                        
                     }
-
+                    
                 }
+                   
 
                 //no write allocate
             
@@ -252,77 +238,67 @@ int main(int argc, char * argv[]) {
                 
                 int hit = 0;
                 //write through, write-allocate
-                for (size_t i = 0; i < cache.sets.size(); i++) {
-                    int break_outer = 0;
-                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                        
-                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag && cache.sets[i].slots[j].index == address_index) {
-                            hit = 1;
-                            store_hits++;
-                            //write immediately to memory
-                            stores_to_memory++;
-                            break_outer = 1;
-                        }
+                
+                for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                    
+                    if ((cache.sets[address_index].slots[j].valid == true) && cache.sets[address_index].slots[j].tag == address_tag) {
+                        hit = 1;
+                        store_hits++;
+                        //write immediately to memory
+                        stores_to_memory++;
                         
                     }
-                    if (break_outer == 1) {
-                        break;
-                    }
-
+                    
                 }
+                    
                 if (hit == 0) {
                     store_misses++;
                     stores_to_memory++;
                     int full_cache = 1;
                     //we missed, first check if there is an empty slot to fill
-                    for (size_t i = 0; i < cache.sets.size(); i++) {
-                        int break_outer = 0;
-                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                            
-                            if (cache.sets[i].slots[j].valid == false) {
+                    
+                    for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                        
+                        if (cache.sets[address_index].slots[j].valid == false) {
                             //if there is an empty slot fill it
-                            cache.sets[i].slots[j].valid = true;
-                            cache.sets[i].slots[j].tag = address_tag;
-                            cache.sets[i].slots[j].index = address_index;
+                            cache.sets[address_index].slots[j].valid = true;
+                            cache.sets[address_index].slots[j].tag = address_tag;
+                            cache.sets[address_index].slots[j].index = address_index;
                             std::time_t t = std::time(0);
-                            cache.sets[i].slots[j].time_stamp = (uint32_t) t;
+                            cache.sets[address_index].slots[j].time_stamp = (uint32_t) t;
                         
                             full_cache = 0;
-                            break_outer = 1;
+                        
                             break;
+                        }
                 
-                            }
-
-                        }
-                        if (break_outer == 1) {
-                            break;
-                        }
                     }
+
                     //slots were full eject least recently used
                     if (full_cache == 1) {
-                        uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
-                        int i_coord = 0;
-                        int j_coord = 0;
-                        for (size_t i = 0; i < cache.sets.size(); i++) {
-                            for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                                
-                               
-                                if (cache.sets[i].slots[j].time_stamp < min_time_stamp) {
-                                    i_coord = i;
-                                    j_coord = j;
-                                }
-                                
-                                    
-                    
-                            }   
-
-                        }
+                        uint32_t min_time_stamp = cache.sets[address_index].slots[0].time_stamp;
                         
-                        cache.sets[i_coord].slots[j_coord].valid = true;
-                        cache.sets[i_coord].slots[j_coord].tag = address_tag;
-                        cache.sets[i_coord].slots[j_coord].index = address_index;
+                        int j_coord = 0;
+                       
+                        for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                            
+                            
+                            if (cache.sets[address_index].slots[j].time_stamp < min_time_stamp) {
+                               
+                                j_coord = j;
+                            }
+                            
+                                
+                
+                        }   
+
+                        
+                        
+                        cache.sets[address_index].slots[j_coord].valid = true;
+                        cache.sets[address_index].slots[j_coord].tag = address_tag;
+                        cache.sets[address_index].slots[j_coord].index = address_index;
                         std::time_t t = std::time(0);
-                        cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
+                        cache.sets[address_index].slots[j_coord].time_stamp = (uint32_t) t;
 
 
 
@@ -340,83 +316,74 @@ int main(int argc, char * argv[]) {
                 
                 int hit = 0;
                 //write back, write-allocate
-                for (size_t i = 0; i < cache.sets.size(); i++) {
-                    int break_outer = 0;
-                    for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
+               
+                for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                    
+                    if ((cache.sets[address_index].slots[j].valid == true) && cache.sets[address_index].slots[j].tag == address_tag) {
+                        hit = 1;
+                        store_hits++;
+                        cache.sets[address_index].slots[j].dirty = 1;
                         
-                        if ((cache.sets[i].slots[j].valid == true) && cache.sets[i].slots[j].tag == address_tag) {
-                            hit = 1;
-                            store_hits++;
-                            cache.sets[i].slots[j].dirty = 1;
-                            break_outer = 1;
-                            break;
-                        }
-                        
+                        break;
                     }
-                    if (break_outer == 1) {
-                            break;
-                    }
-
+                    
                 }
+                    
                 if (hit == 0) {
                     store_misses++;
                     stores_to_memory++;
                     //write allocate
                     int full_cache = 1;
                     //we missed, first check if there is an empty slot to fill
-                    for (size_t i = 0; i < cache.sets.size(); i++) {
-                        int break_outer = 0;
-                        for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                            
-                            if (cache.sets[i].slots[j].valid == false) {
-                                //if there is an empty slot fill it
-                                cache.sets[i].slots[j].valid = true;
-                                cache.sets[i].slots[j].tag = address_tag;
-                                cache.sets[i].slots[j].index = address_index;
-                                std::time_t t = std::time(0);
-                                cache.sets[i].slots[j].time_stamp = (uint32_t) t;
-                            
-                                full_cache = 0;
-                                break_outer = 1;
-                                break;
-                
-                            }
-                            
+                   
+                    for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                        
+                        if (cache.sets[address_index].slots[j].valid == false) {
+                            //if there is an empty slot fill it
+                            cache.sets[address_index].slots[j].valid = true;
+                            cache.sets[address_index].slots[j].tag = address_tag;
+                            cache.sets[address_index].slots[j].index = address_index;
+                            std::time_t t = std::time(0);
+                            cache.sets[address_index].slots[j].time_stamp = (uint32_t) t;
+                        
+                            full_cache = 0;
+                           
+                            break;
+            
+                        }
+                        
 
-                        }
-                        if (break_outer == 1) {
-                                break;
-                        }
                     }
+                       
                     if (full_cache == 1) {
                         //find lru
-                        uint32_t min_time_stamp = cache.sets[0].slots[0].time_stamp;
+                        uint32_t min_time_stamp = cache.sets[address_index].slots[0].time_stamp;
                         
-                        int i_coord = 0;
+                        
                         int j_coord = 0;
-                        for (size_t i = 0; i < cache.sets.size(); i++) {
-                            for (size_t j = 0; j < cache.sets[i].slots.size(); j++) {
-                                
-                                
-                                if (cache.sets[i].slots[j].time_stamp < min_time_stamp) {
-                                   i_coord = i;
-                                   j_coord = j;
-                                }
-                                
-                                    
-                    
-                            }   
-
-                        }
                         
-                        cache.sets[i_coord].slots[j_coord].valid = true;
-                        cache.sets[i_coord].slots[j_coord].tag = address_tag;
-                        cache.sets[i_coord].slots[j_coord].index = address_index;
+                        for (size_t j = 0; j < cache.sets[address_index].slots.size(); j++) {
+                            
+                            
+                            if (cache.sets[address_index].slots[j].time_stamp < min_time_stamp) {
+                              
+                                j_coord = j;
+                            }
+                            
+                                
+                
+                        }   
+
+                        
+                        
+                        cache.sets[address_index].slots[j_coord].valid = true;
+                        cache.sets[address_index].slots[j_coord].tag = address_tag;
+                        cache.sets[address_index].slots[j_coord].index = address_index;
                         std::time_t t = std::time(0);
-                        cache.sets[i_coord].slots[j_coord].time_stamp = (uint32_t) t;
+                        cache.sets[address_index].slots[j_coord].time_stamp = (uint32_t) t;
                         
                         //check if ejected slot was dirty and needs to be written to memory
-                        if (cache.sets[i_coord].slots[j_coord].dirty == 1) {
+                        if (cache.sets[address_index].slots[j_coord].dirty == 1) {
                             stores_to_memory++;
                         }
 
@@ -450,7 +417,7 @@ int main(int argc, char * argv[]) {
             
             
     }
-    total_cycles = 4*load_hits+100*load_misses+4*store_hits+100*stores_to_memory;
+    total_cycles = 4*load_hits+100*load_misses*num_bytes/4+4*store_hits+100*stores_to_memory*num_bytes/4;
     cout << "Total loads: " << total_loads << endl;
     cout << "Total stores: " << total_stores << endl;
     cout << "Load hits: " << load_hits << endl;
@@ -463,7 +430,7 @@ int main(int argc, char * argv[]) {
 
 
 
-  
+    
     
   
 
