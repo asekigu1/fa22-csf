@@ -93,7 +93,7 @@ int main(int argc, char * argv[]) {
     int total_cycles = 0;
 
     string line;
-    
+    int count = 0;
     while (std::getline(cin, line)){
         //get if load or store
         string operation;
@@ -108,9 +108,15 @@ int main(int argc, char * argv[]) {
         s2 << std::hex << address;
         uint32_t num;
         s2 >> num;
-        uint32_t address_tag= get_tag(num, num_sets, num_blocks);
-        uint32_t address_index = get_index(num, num_sets, num_blocks);
-          
+        uint32_t address_tag= get_tag(num, num_sets, num_bytes);
+        uint32_t address_index = get_index(num, num_sets, num_bytes);
+        
+        
+        
+        
+        if (num_sets == 1) {
+            address_index = 0;
+        }
             
 
         if (operation == "l") {
