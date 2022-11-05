@@ -41,7 +41,7 @@ int main(int argc, char * argv[]) {
     int load_misses = 0;
     int store_hits = 0;
     int store_misses = 0;
-    int stores_to_memory = 0;
+    int memory_access = 0;
     int total_cycles = 0;
 
     string line;
@@ -64,170 +64,96 @@ int main(int argc, char * argv[]) {
             address_index = 0;
         }
 
-
         if (operation == "l") {
             total_loads++;
-            bool hit = false;
-            bool complete = false;
-            
-            //check for hit
-            for (int i = 0; i < num_blocks; i++) {
-                if ((cache.sets[address_index].blocks[i].valid == true) && (cache.sets[address_index].blocks[i].tag == address_tag)) {
-                    hit = true;
-                    load_hits++;
 
-                    if (lru) {
-                        // only update time stamp for lru
-                        std::time_t t = std::time(0);
-                        cache.sets[address_index].blocks[i].time_stamp = (uint32_t) t;
-                    }
-                    
-                    break;
-                }
-            }
+            // check if there are any hits
+            int hit = -1;
+            hit = check_hit(&cache, address_index, address_tag, &load_hits, lru);
 
             //miss 
-            if (!hit) {
+            if (hit == -1) {
                 load_misses++;
-                //iterate through to insert in empty block
-                for (int i = 0; i < num_blocks; i++) {
-                    if (cache.sets[address_index].blocks[i].valid == false) {
-                        //add to empty block
-                        cache.sets[address_index].blocks[i].tag = address_tag;
-                        cache.sets[address_index].blocks[i].index = address_index;
-                        cache.sets[address_index].blocks[i].valid = true;
-                        std::time_t t = std::time(0);
-                        cache.sets[address_index].blocks[i].time_stamp = (uint32_t) t;
-                        cache.sets[address_index].blocks[i].dirty = false;
-                        complete = true;
-                        break;
-                    }
-                }
+                int complete = -1;
+                complete = insert_if_cache_not_full(&cache, address_index, address_tag, &memory_access);
 
                 //find block to eject
-                if (!complete) {
-                    
-                    uint32_t min_time_stamp = cache.sets[address_index].blocks[0].time_stamp;
-                    int index = 0;
-
-                    //iterate through to find minimum time stamp
-                    for (int i = 0; i < num_blocks; i++) {
-                        if (cache.sets[address_index].blocks[i].time_stamp < min_time_stamp) {
-                            min_time_stamp = cache.sets[address_index].blocks[i].time_stamp;
-                            index = i;
-                        }
-                    }
+                if (complete == -1) {
+                    // find the least recently used, OR first-in
+                    int index = find_oldest(&cache, address_index);
 
                     if (cache.sets[address_index].blocks[index].dirty && !write_through) {
                         // if write-back and the block is dirty, write to memory
-                        stores_to_memory++;
+                        memory_access++;
                     }
 
                     //replace slot
-                    cache.sets[address_index].blocks[index].tag = address_tag;
-                    cache.sets[address_index].blocks[index].index = address_index;
-                    cache.sets[address_index].blocks[index].valid = true;
-                    std::time_t t = std::time(0);
-                    cache.sets[address_index].blocks[index].time_stamp = (uint32_t) t;
-                    cache.sets[address_index].blocks[index].dirty = false;
+                    new_cache(&cache, address_index, address_tag, index, &memory_access);
                 }
             }
         }
 
         if (operation == "s") {
             total_stores++;
-            bool hit = false;
-            bool complete = false;
+            
 
             //check for hit
-            for (int i = 0; i < num_blocks; i++) {
-                if ((cache.sets[address_index].blocks[i].valid == true) && (cache.sets[address_index].blocks[i].tag == address_tag)) {
-                    hit = true;
-                    store_hits++;
-
-                    if (lru) {
-                        // only update time stamp for lru
-                        std::time_t t = std::time(0);
-                        cache.sets[address_index].blocks[i].time_stamp = (uint32_t) t;
-                    }
-
-                    if (write_through) {
-                        //write to memory directly
-                        stores_to_memory++;
-                    } else {
-                        //write to cache
-                        cache.sets[address_index].blocks[i].dirty = true;
-                    }
-                    
-                    break;
+            int hit = -1;
+            hit = check_hit(&cache, address_index, address_tag, &store_hits, lru);
+            if (hit != -1) {
+                cache.sets[address_index].blocks[hit].dirty = true; //write to cache
+                if (write_through) {
+                    //write to memory
+                    memory_access++;
                 }
             }
             
-            if (!hit) {
+                
+            
+            if (hit == -1) {
                 store_misses++;
 
                 if (write_allocate) {
                     //iterate through to insert in empty block
-                    for (int i = 0; i < num_blocks; i++) {
-                        if (cache.sets[address_index].blocks[i].valid == false) {
-                            //add to empty block
-                            cache.sets[address_index].blocks[i].tag = address_tag;
-                            cache.sets[address_index].blocks[i].index = address_index;
-                            cache.sets[address_index].blocks[i].valid = true;
-                            std::time_t t = std::time(0);
-                            cache.sets[address_index].blocks[i].time_stamp = (uint32_t) t;
-                            cache.sets[address_index].blocks[i].dirty = true;
-                            complete = true;
-                            
-                            if (write_through) {
-                                // only store to memory for write_through
-                                stores_to_memory++;
-                            }
-                            break;
+                    int complete = -1;
+                    complete = insert_if_cache_not_full(&cache, address_index, address_tag, &memory_access);
+                    if (complete != -1) { // if it successfully loaded
+                        cache.sets[address_index].blocks[hit].dirty = true; //write to cache
+                        if (write_through) {
+                            //write to memory
+                            memory_access++;
                         }
-                    }
-
-                    //find block to eject
-                    if (!complete) {
-                        uint32_t min_time_stamp = cache.sets[address_index].blocks[0].time_stamp;
-                        int index = 0;
-                        //iterate through to find minimum time stamp
-                        for (int i = 0; i < num_blocks; i++) {
-                            if (cache.sets[address_index].blocks[i].time_stamp < min_time_stamp) {
-                                min_time_stamp = cache.sets[address_index].blocks[i].time_stamp;
-                                index = i;
-                            }
-                        }
+                    } else //find block to eject
+                     {
+                        // find the least recently used, OR first-in
+                        int index = find_oldest(&cache, address_index);
 
                         if (cache.sets[address_index].blocks[index].dirty && !write_through) {
                             // if write-back and the block is dirty, write to memory
-                            stores_to_memory++;
+                            memory_access++;
                         }
 
                         //replace slot
-                        cache.sets[address_index].blocks[index].tag = address_tag;
-                        cache.sets[address_index].blocks[index].index = address_index;
-                        cache.sets[address_index].blocks[index].valid = true;
-                        std::time_t t = std::time(0);
-                        cache.sets[address_index].blocks[index].time_stamp = (uint32_t) t;
-                        cache.sets[address_index].blocks[index].dirty = true;
+                        new_cache(&cache, address_index, address_tag, index, &memory_access);
                         if (write_through) {
                             // only store to memory for write_through
-                            stores_to_memory++;
+                            memory_access++;
+                        } else {
+                            cache.sets[address_index].blocks[index].dirty = true;
                         }
                     }
                     
                 } else {
                     // for no-write-allocate, don't modify cache for miss
                     // directly store to memory
-                    stores_to_memory++;
+                    memory_access++;
                 }
             }
             
         }
     }
 
-    total_cycles = load_hits + store_hits + (100*load_misses*num_bytes/4)+(100*stores_to_memory*num_bytes/4);
+    total_cycles = load_hits + store_hits +(100*memory_access*num_bytes/4);
     cout << "Total loads: " << total_loads << endl;
     cout << "Total stores: " << total_stores << endl;
     cout << "Load hits: " << load_hits << endl;
