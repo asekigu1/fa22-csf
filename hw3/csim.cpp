@@ -59,7 +59,7 @@ int main(int argc, char * argv[]) {
         uint32_t address;
         s2 >> address;
         uint32_t address_tag = get_tag(address, num_sets, num_bytes);
-        uint32_t address_index = get_index(address, num_sets, num_bytes);
+        uint32_t address_index = get_index(address, num_sets, num_bytes, num_blocks);
         if (num_sets == 1) {
             address_index = 0;
         }

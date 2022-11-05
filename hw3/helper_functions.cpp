@@ -31,18 +31,29 @@ int log_2(int num) {
 }
 
 uint32_t get_tag(uint32_t num, uint32_t set_size, uint32_t block_size) {
+    uint32_t temp = num/(set_size * block_size);
+    
     uint32_t log2_set_size = log_2(set_size);
     uint32_t log2_block_size = log_2(block_size);
-    return num >> (log2_set_size + log2_block_size);
+    num = num >> (log2_set_size + log2_block_size);
+
+    
+    return temp;
 }
 
-uint32_t get_index(uint32_t num, uint32_t set_size, uint32_t block_size) {
+uint32_t get_index(uint32_t num, uint32_t set_size, uint32_t block_size, uint32_t num_blocks) {
+    uint32_t temp = num/(block_size);
+    temp = temp % (set_size);
+
+
     uint32_t log2_set_size = log_2(set_size);
     uint32_t log2_block_size = log_2(block_size);
     uint32_t digits = 32 - log2_block_size - log2_set_size;
     num = num << digits;
     num = num >> (digits + log2_block_size);
-    return num;
+
+
+    return temp;
 }
 
 int validate_input(int argc, char * argv[], int* num_sets, int* num_blocks, int* num_bytes, bool* write_allocate, bool* write_through, bool* lru) {
@@ -151,6 +162,7 @@ int find_oldest(Cache* cache, uint32_t address_index) {
             index = i;
         }
     }
+
     return index;
 }
 
