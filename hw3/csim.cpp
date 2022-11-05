@@ -58,7 +58,7 @@ int main(int argc, char * argv[]) {
         uint32_t address;
         s2 >> address;
         uint32_t address_tag = get_tag(address, num_sets, num_bytes);
-        uint32_t address_index = get_index(address, num_sets, num_bytes, num_blocks);
+        uint32_t address_index = get_index(address, num_sets, num_bytes);
         if (num_sets == 1) {
             address_index = 0;
         }
@@ -83,7 +83,7 @@ int main(int argc, char * argv[]) {
 
                     if (cache.sets[address_index].blocks[index].dirty && !write_through) {
                         // if write-back and the block is dirty, write to memory
-                        memory_access = memory_access * (num_bytes/4);
+                        memory_access += (num_bytes/4);
                     }
 
                     //replace slot
@@ -130,7 +130,7 @@ int main(int argc, char * argv[]) {
 
                         if (cache.sets[address_index].blocks[index].dirty && !write_through) {
                             // if write-back and the block is dirty, write to memory
-                            memory_access = memory_access * (num_bytes/4);
+                            memory_access += (num_bytes/4);
                         }
 
                         //replace slot
@@ -161,5 +161,6 @@ int main(int argc, char * argv[]) {
     cout << "Store hits: "<< store_hits << endl;
     cout << "Store misses: " << store_misses <<endl;
     cout << "Total cycles: " << total_cycles << endl;
+    cout << "memory " << memory_access << endl;
     return 0;
 }

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <bitset>
 #include "helper_functions.h"
+#include <climits>
 using std::cout; using std::cin; using std::endl;
 using std::cerr; using std::vector; using std::string;
 
@@ -20,38 +21,15 @@ int is_power_of_2(int n){
     return 0;
 }
 
-int log_2(int num) {
-    int count = 0;
-    while (num != 1) {
-        num = num /2;
-        count++;
-    }
-    return count;
-}
 
 uint32_t get_tag(uint32_t num, uint32_t set_size, uint32_t block_size) {
     uint32_t temp = num/(set_size * block_size);
-    
-    uint32_t log2_set_size = log_2(set_size);
-    uint32_t log2_block_size = log_2(block_size);
-    num = num >> (log2_set_size + log2_block_size);
-
-    
     return temp;
 }
 
-uint32_t get_index(uint32_t num, uint32_t set_size, uint32_t block_size, uint32_t num_blocks) {
+uint32_t get_index(uint32_t num, uint32_t set_size, uint32_t block_size) {
     uint32_t temp = num/(block_size);
     temp = temp % (set_size);
-
-
-    uint32_t log2_set_size = log_2(set_size);
-    uint32_t log2_block_size = log_2(block_size);
-    uint32_t digits = 32 - log2_block_size - log2_set_size;
-    num = num << digits;
-    num = num >> (digits + log2_block_size);
-
-
     return temp;
 }
 
@@ -129,7 +107,7 @@ int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* h
 
             if (lru) {
                 // only update time stamp for lru
-                cache->sets[address_index].blocks[i].time_stamp = (uint32_t) total_loads + total_stores;
+                cache->sets[address_index].blocks[i].time_stamp = total_loads + total_stores;
             }
             return i;
         }
@@ -142,15 +120,16 @@ int new_cache(Cache* cache, uint32_t address_index, uint32_t address_tag, int bl
     cache->sets[address_index].blocks[block_ind].tag = address_tag;
     cache->sets[address_index].blocks[block_ind].index = address_index;
     cache->sets[address_index].blocks[block_ind].valid = true;
-    cache->sets[address_index].blocks[block_ind].time_stamp = (uint32_t) total_loads + total_stores;
+    cache->sets[address_index].blocks[block_ind].time_stamp = total_loads + total_stores;
     cache->sets[address_index].blocks[block_ind].dirty = false;
     *memory = *memory + 1;
     return 1;
 }
 
 int find_oldest(Cache* cache, uint32_t address_index) {
-    uint32_t min_time_stamp = cache->sets[address_index].blocks[0].time_stamp;
-        int index = 0;
+    
+    int min_time_stamp = INT_MAX;
+    int index = 0;
 
     //iterate through to find minimum time stamp
     for (int i = 0; i < (int) cache->sets[address_index].blocks.size(); i++) {
