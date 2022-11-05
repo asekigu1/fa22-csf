@@ -15,7 +15,7 @@ struct Block {
     uint32_t index;
     bool valid = false;
     uint32_t time_stamp;
-    int dirty = 0;
+    bool dirty = false;
 };
 
 struct Set {
