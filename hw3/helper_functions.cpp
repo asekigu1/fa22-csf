@@ -6,7 +6,6 @@
 #include <sstream>
 #include <bitset>
 #include "helper_functions.h"
-#include <ctime>
 using std::cout; using std::cin; using std::endl;
 using std::cerr; using std::vector; using std::string;
 
@@ -121,7 +120,7 @@ int validate_input(int argc, char * argv[], int* num_sets, int* num_blocks, int*
     return 0;
 }
 
-int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* hits, bool lru) {
+int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* hits, bool lru, int total_loads, int total_stores) {
     //check for hit
     for (int i = 0; i < (int) cache->sets[address_index].blocks.size(); i++) {
         
@@ -130,8 +129,7 @@ int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* h
 
             if (lru) {
                 // only update time stamp for lru
-                std::time_t t = std::time(0);
-                cache->sets[address_index].blocks[i].time_stamp = (uint32_t) t;
+                cache->sets[address_index].blocks[i].time_stamp = (uint32_t) total_loads + total_stores;
             }
             return i;
         }
@@ -139,13 +137,12 @@ int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* h
     return -1;
 }
 
-int new_cache(Cache* cache, uint32_t address_index, uint32_t address_tag, int block_ind, int* memory) {
+int new_cache(Cache* cache, uint32_t address_index, uint32_t address_tag, int block_ind, int* memory, int total_loads, int total_stores) {
     //add to empty block
     cache->sets[address_index].blocks[block_ind].tag = address_tag;
     cache->sets[address_index].blocks[block_ind].index = address_index;
     cache->sets[address_index].blocks[block_ind].valid = true;
-    std::time_t t = std::time(0);
-    cache->sets[address_index].blocks[block_ind].time_stamp = (uint32_t) t;
+    cache->sets[address_index].blocks[block_ind].time_stamp = (uint32_t) total_loads + total_stores;
     cache->sets[address_index].blocks[block_ind].dirty = false;
     *memory = *memory + 1;
     return 1;
@@ -166,11 +163,11 @@ int find_oldest(Cache* cache, uint32_t address_index) {
     return index;
 }
 
-int insert_if_cache_not_full(Cache* cache, uint32_t address_index, uint32_t address_tag, int* memory) {
+int insert_if_cache_not_full(Cache* cache, uint32_t address_index, uint32_t address_tag, int* memory, int total_loads, int total_stores) {
     //iterate through to insert in empty block
     for (int i = 0; i < (int) cache->sets[address_index].blocks.size(); i++) {
         if (!cache->sets[address_index].blocks[i].valid) {
-            new_cache(cache, address_index, address_tag, i, memory);
+            new_cache(cache, address_index, address_tag, i, memory, total_loads, total_stores);
             return i;
         }
     }

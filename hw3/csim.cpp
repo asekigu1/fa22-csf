@@ -6,7 +6,6 @@
 #include <sstream>
 #include <bitset>
 #include "helper_functions.h"
-#include <ctime>
 
 
 using std::cout; using std::cin; using std::endl;
@@ -69,13 +68,13 @@ int main(int argc, char * argv[]) {
 
             // check if there are any hits
             int hit = -1;
-            hit = check_hit(&cache, address_index, address_tag, &load_hits, lru);
+            hit = check_hit(&cache, address_index, address_tag, &load_hits, lru, total_loads, total_stores);
 
             //miss 
             if (hit == -1) {
                 load_misses++;
                 int complete = -1;
-                complete = insert_if_cache_not_full(&cache, address_index, address_tag, &memory_access);
+                complete = insert_if_cache_not_full(&cache, address_index, address_tag, &memory_access, total_loads, total_stores);
 
                 //find block to eject
                 if (complete == -1) {
@@ -84,11 +83,11 @@ int main(int argc, char * argv[]) {
 
                     if (cache.sets[address_index].blocks[index].dirty && !write_through) {
                         // if write-back and the block is dirty, write to memory
-                        memory_access++;
+                        memory_access = memory_access * (num_bytes/4);
                     }
 
                     //replace slot
-                    new_cache(&cache, address_index, address_tag, index, &memory_access);
+                    new_cache(&cache, address_index, address_tag, index, &memory_access, total_loads, total_stores);
                 }
             }
         }
@@ -99,11 +98,12 @@ int main(int argc, char * argv[]) {
 
             //check for hit
             int hit = -1;
-            hit = check_hit(&cache, address_index, address_tag, &store_hits, lru);
+            hit = check_hit(&cache, address_index, address_tag, &store_hits, lru, total_loads, total_stores);
             if (hit != -1) {
                 cache.sets[address_index].blocks[hit].dirty = true; //write to cache
                 if (write_through) {
                     //write to memory
+
                     memory_access++;
                 }
             }
@@ -116,7 +116,7 @@ int main(int argc, char * argv[]) {
                 if (write_allocate) {
                     //iterate through to insert in empty block
                     int complete = -1;
-                    complete = insert_if_cache_not_full(&cache, address_index, address_tag, &memory_access);
+                    complete = insert_if_cache_not_full(&cache, address_index, address_tag, &memory_access, total_loads, total_stores);
                     if (complete != -1) { // if it successfully loaded
                         cache.sets[address_index].blocks[hit].dirty = true; //write to cache
                         if (write_through) {
@@ -130,11 +130,11 @@ int main(int argc, char * argv[]) {
 
                         if (cache.sets[address_index].blocks[index].dirty && !write_through) {
                             // if write-back and the block is dirty, write to memory
-                            memory_access++;
+                            memory_access = memory_access * (num_bytes/4);
                         }
 
                         //replace slot
-                        new_cache(&cache, address_index, address_tag, index, &memory_access);
+                        new_cache(&cache, address_index, address_tag, index, &memory_access, total_loads, total_stores);
                         if (write_through) {
                             // only store to memory for write_through
                             memory_access++;
@@ -153,7 +153,7 @@ int main(int argc, char * argv[]) {
         }
     }
 
-    total_cycles = load_hits + store_hits +(100*memory_access*num_bytes/4);
+    total_cycles = load_hits + store_hits +(100*memory_access);
     cout << "Total loads: " << total_loads << endl;
     cout << "Total stores: " << total_stores << endl;
     cout << "Load hits: " << load_hits << endl;
