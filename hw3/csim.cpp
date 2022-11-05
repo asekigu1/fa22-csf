@@ -18,8 +18,8 @@ using std::cerr; using std::vector; using std::string; using std::stringstream;
 
 int main(int argc, char * argv[]) {
     
-    // validate arguments
-    if (argc != 6 && argc != 7) { 
+    // validate argument number
+    if (argc != 7) { 
         cerr << "Invalid number of arguments" << endl;
         return 1;
     }
