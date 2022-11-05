@@ -21,7 +21,6 @@ struct Block {
 
 struct Set {
     vector<Block> blocks;
-    //map<unsigned, unsigned> index; // map of tag to index of slot
 };
 
 struct Cache {
@@ -33,6 +32,6 @@ uint32_t get_tag(uint32_t num, uint32_t set_size, uint32_t block_size);
 uint32_t get_index(uint32_t num, uint32_t set_size, uint32_t block_size);
 int validate_input(int argc, char * argv[], int* num_sets, int* num_blocks, int* num_bytes, bool* write_allocate, bool* write_through, bool* lru);
 int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* hits, bool lru, int total_loads, int total_stores);
-int new_cache(Cache* cache, uint32_t address_index, uint32_t address_tag, int block_ind, int* memory, int total_loads, int total_stores);
+int new_cache(Cache* cache, uint32_t address_index, uint32_t address_tag, int block_ind, int* memory, int total_loads, int total_stores, int num_bytes);
 int find_oldest(Cache* cache, uint32_t address_index);
-int insert_if_cache_not_full(Cache* cache, uint32_t address_index, uint32_t address_tag, int* memory, int total_loads, int total_stores);
+int insert_if_cache_not_full(Cache* cache, uint32_t address_index, uint32_t address_tag, int* memory, int total_loads, int total_stores, int num_bytes);

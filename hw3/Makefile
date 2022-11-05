@@ -15,4 +15,4 @@ helper_functions.o: helper_functions.cpp helper_functions.h
 	$(CXX) $(CFLAGS) -c helper_functions.cpp 
 
 clean:
-	rm -f *.o csim
+	rm -f *.o csim hw3.zip

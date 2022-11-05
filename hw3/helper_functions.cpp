@@ -99,11 +99,11 @@ int validate_input(int argc, char * argv[], int* num_sets, int* num_blocks, int*
 }
 
 int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* hits, bool lru, int total_loads, int total_stores) {
-    //check for hit
+    // check for hit
+    // returns: the index of the hit block, -1 if miss.
     for (int i = 0; i < (int) cache->sets[address_index].blocks.size(); i++) {
-        
         if (cache->sets[address_index].blocks[i].valid && (cache->sets[address_index].blocks[i].tag == address_tag)) {
-            *hits = *hits + 1;
+            *hits = *hits + 1; // increment the corresponding hit, whether its store or load
 
             if (lru) {
                 // only update time stamp for lru
@@ -115,14 +115,14 @@ int check_hit(Cache* cache, uint32_t address_index, uint32_t address_tag, int* h
     return -1;
 }
 
-int new_cache(Cache* cache, uint32_t address_index, uint32_t address_tag, int block_ind, int* memory, int total_loads, int total_stores) {
-    //add to empty block
+int new_cache(Cache* cache, uint32_t address_index, uint32_t address_tag, int block_ind, int* memory, int total_loads, int total_stores, int num_bytes) {
+    // add cache to an empty block
     cache->sets[address_index].blocks[block_ind].tag = address_tag;
     cache->sets[address_index].blocks[block_ind].index = address_index;
     cache->sets[address_index].blocks[block_ind].valid = true;
     cache->sets[address_index].blocks[block_ind].time_stamp = total_loads + total_stores;
     cache->sets[address_index].blocks[block_ind].dirty = false;
-    *memory = *memory + 1;
+    *memory = *memory + (num_bytes/4); // load block onto cache
     return 1;
 }
 
@@ -142,11 +142,12 @@ int find_oldest(Cache* cache, uint32_t address_index) {
     return index;
 }
 
-int insert_if_cache_not_full(Cache* cache, uint32_t address_index, uint32_t address_tag, int* memory, int total_loads, int total_stores) {
-    //iterate through to insert in empty block
+int insert_if_cache_not_full(Cache* cache, uint32_t address_index, uint32_t address_tag, int* memory, int total_loads, int total_stores, int num_bytes) {
+    //iterate through to insert in empty block f it exists.
+    //return index of the first empty block, or -1 if the cache is full.
     for (int i = 0; i < (int) cache->sets[address_index].blocks.size(); i++) {
         if (!cache->sets[address_index].blocks[i].valid) {
-            new_cache(cache, address_index, address_tag, i, memory, total_loads, total_stores);
+            new_cache(cache, address_index, address_tag, i, memory, total_loads, total_stores, num_bytes);
             return i;
         }
     }
