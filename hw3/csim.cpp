@@ -164,7 +164,6 @@ int main(int argc, char * argv[]) {
     // additional stats for part(b)
     float rate = (load_hits + store_hits)/ (float)(total_loads + total_stores);
     cout << "Hit Rate (%): " << rate*100 << endl;
-    cout << "Total cycles: " << total_cycles << endl;
     cout << "Total Cache Size: " << (num_sets*num_blocks*num_bytes) << endl;
     int overhead = 0;
     if (write_allocate && write_through) {
