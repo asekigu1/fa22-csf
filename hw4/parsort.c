@@ -41,7 +41,14 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
 }
 
 cmpvals(const void *p1, const void *p2){
-  return cmp(*(const int64_t **) p1, *(const int64_t **) p2);
+  return bcmp(*(const int64_t **) p1, *(const int64_t **) p2, sizeof(int64_t));
+}
+
+int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
+  // this is now in the child process
+  merge_sort(arr, begin, end, threshold);
+  return 1;
+  // TODO: a child process not exiting normally, or exiting with a non-zero exit code?
 }
 
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
@@ -49,51 +56,43 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if ((end-begin) < threshold ) {
     qsort(arr, end-begin, sizeof(int64_t*), cmpvals);
   } else {
-    size_t newBeg = 0;
-    size_t newEnd = 0;
     pid_t pid = fork();
+    size_t mid = (begin+end)/2;
     if (pid == -1) {
       // fork failed to start a new process
       // handle the error and exit
       fprintf(stderr, "Error: fork failed to start a new process\n");
-      return 1;
+      return;
     } else if (pid == 0) {
-      // this is now in the child process
-      newBeg = (begin+end)/2 + 1;
-      newEnd = end;
-    } else {
-      // parent process
-      newBeg = begin;
-      newEnd = (begin+end)/2;
-    }
-    merge_sort(arr, newBeg, newEnd, threshold);
-
-    if (pid == 0) {
-      int retcode = do_child_work();
+      int retcode = do_child_work(arr, begin, mid, threshold);
       exit(retcode);
       // everything past here is now unreachable in the child
-      // TODO: a child process not exiting normally, or exiting with a non-zero exit code?
+    } else {
+      // parent process
+      begin = mid + 1;
+      merge_sort(arr, begin, end, threshold);
     }
-
+    
     int wstatus;
     // blocks until the process indentified by pid_to_wait_for completes
     pid_t actual_pid = waitpid(pid, &wstatus, 0);
     if (actual_pid == -1) {
-        // handle waitpid failure
-
+      // handle waitpid failure
+      fprintf(stderr, "Error: waitpid failure\n");
+      return;
     }
 
     if (!WIFEXITED(wstatus)) {
       // subprocess crashed, was interrupted, or did not exit normally
       // handle as error
       fprintf(stderr, "Error: subprocess crashed, was interrupted, or did not exit normally\n");
-      return 1;
+      return;
     }
     if (WEXITSTATUS(wstatus) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
       fprintf(stderr, "Error: subprocess returned a non-zero exit code\n");
-      return 1;
+      return;
     }
     // if pid is not 0, we are in the parent process
     // WARNING, if the child process path can get here, things will quickly break very badly
@@ -101,7 +100,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     int64_t arr[end-begin]; //clear temparr
     int64_t *temparr;
     temparr = arr;
-    merge(arr, begin, newEnd, end, temparr);
+    merge(arr, begin, mid, end, temparr);
 
     for (size_t i = 0; i < end; i++) {
       //update original array
@@ -126,7 +125,6 @@ int main(int argc, char **argv) {
     /* TODO: report an error (threshold value is invalid) */;
     fprintf(stderr, "Error: invalid threshold value\n");
     return 1;
-
   }
     
 
