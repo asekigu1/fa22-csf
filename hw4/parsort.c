@@ -10,7 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr);
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold);
+int cmpvals(const void *p1, const void *p2);
+int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold);
+
+
 void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr) {
   // TODO: implement
   size_t leftIndex = 0;
@@ -41,16 +46,6 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
   }
 }
 
-int cmpvals(const void *p1, const void *p2){
-  return ( *(size_t*)p1 - *(size_t*)p2 );
-}
-
-int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
-  // this is now in the child process
-  merge_sort(arr, begin, end, threshold);
-  return 1;
-  // TODO: a child process not exiting normally, or exiting with a non-zero exit code?
-}
 
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // TODO: implement
@@ -63,7 +58,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
       // fork failed to start a new process
       // handle the error and exit
       fprintf(stderr, "Error: fork failed to start a new process\n");
-      return;
+      exit(1);
     } else if (pid == 0) {
       int retcode = do_child_work(arr, begin, mid, threshold);
       exit(retcode);
@@ -80,20 +75,20 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     if (actual_pid == -1) {
       // handle waitpid failure
       fprintf(stderr, "Error: waitpid failure\n");
-      return;
+      exit(1); // exit with 1 is going to terminate the entire process
     }
 
     if (!WIFEXITED(wstatus)) {
       // subprocess crashed, was interrupted, or did not exit normally
       // handle as error
       fprintf(stderr, "Error: subprocess crashed, was interrupted, or did not exit normally\n");
-      return;
+      exit(1);
     }
     if (WEXITSTATUS(wstatus) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
       fprintf(stderr, "Error: subprocess returned a non-zero exit code\n");
-      return;
+      exit(1);
     }
     // if pid is not 0, we are in the parent process
     // WARNING, if the child process path can get here, things will quickly break very badly
@@ -109,6 +104,17 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     }
   }
   
+}
+
+int cmpvals(const void *p1, const void *p2){
+  return ( *(size_t*)p1 - *(size_t*)p2 );
+}
+
+int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
+  // this is now in the child process
+  merge_sort(arr, begin, end, threshold);
+  return 1;
+  // TODO: a child process not exiting normally, or exiting with a non-zero exit code?
 }
 
 int main(int argc, char **argv) {
@@ -159,11 +165,11 @@ int main(int argc, char **argv) {
   // depletion!
 
   // TODO: sort the data!
-  size_t numElements = file_size_in_bytes/sizeof(size_t);
+  size_t numElements = file_size_in_bytes/sizeof(int64_t);
   merge_sort(data, 0, numElements, threshold);
 
   // TODO: unmap and close the file
-  int retVal = munmap(NULL, file_size_in_bytes);
+  int retVal = munmap(data, file_size_in_bytes);
   if (retVal == -1) {
     fprintf(stderr, "Error: failure to munmap the file data\n");
     return 1;
@@ -175,6 +181,5 @@ int main(int argc, char **argv) {
   }
 
   // TODO: exit with a 0 exit code if sort was successful
-  // TODO: check if sort is successful?
   return 0;
 }

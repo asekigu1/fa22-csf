@@ -1,4 +1,5 @@
-CONTRIBUTIONS
+Name: Aimi Sekiguchi
+JHED: asekigu1
 
 TODO: write a brief summary of how each team member contributed to
 the project.
