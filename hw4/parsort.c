@@ -17,9 +17,9 @@ int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold);
 
 void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr) {
   // TODO: implement
-  size_t leftIndex = 0;
-  size_t rightIndex = mid+1;
-  size_t tempIndex = 0;
+  size_t leftIndex = begin;
+  size_t rightIndex = mid;
+  size_t tempIndex = begin;
 
   while ((leftIndex < mid) && (rightIndex < end)) {
     if (arr[leftIndex] <= arr[rightIndex]) {
@@ -43,6 +43,8 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
     rightIndex++;
     tempIndex++;
   }
+
+  
 }
 
 int cmpvals(const void *p1, const void *p2){
@@ -63,55 +65,61 @@ int cmpvals(const void *p1, const void *p2){
 
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // TODO: implement
+  if (begin >= end) {
+    return;
+  }
   size_t numElements = end - begin;
   if ((numElements) < threshold ) {
     qsort(arr, numElements, sizeof(int64_t), cmpvals);
   } else {
-    pid_t pid = fork();
-    size_t mid = (begin+end)/2;
-    if (pid == -1) {
-      // fork failed to start a new process
-      // handle the error and exit
-      fprintf(stderr, "Error: fork failed to start a new process\n");
-      exit(1);
-    } else if (pid == 0) {
-      int retcode = do_child_work(arr, begin, mid, threshold);
-      exit(retcode);
-      // everything past here is now unreachable in the child
-    } else {
-      // parent process
-      begin = mid + 1;
-      merge_sort(arr, begin, end, threshold);
-    }
+    // lines 70~110 are fork() implementation
+    // pid_t pid = fork();
+    // size_t mid = (begin+end)/2;
+    // if (pid == -1) {
+    //   // fork failed to start a new process
+    //   // handle the error and exit
+    //   fprintf(stderr, "Error: fork failed to start a new process\n");
+    //   exit(1);
+    // } else if (pid == 0) {
+    //   int retcode = do_child_work(arr, begin, mid, threshold);
+    //   exit(retcode);
+    //   // everything past here is now unreachable in the child
+    // } else {
+    //   // parent process
+    //   begin = mid + 1;
+    //   merge_sort(arr, begin, end, threshold);
+    // }
     
-    int wstatus;
-    // blocks until the process indentified by pid_to_wait_for completes
-    pid_t actual_pid = waitpid(pid, &wstatus, 0);
-    if (actual_pid == -1) {
-      // handle waitpid failure
-      fprintf(stderr, "Error: waitpid failure\n");
-      exit(1); // exit with 1 is going to terminate the entire process
-    }
+    // int wstatus;
+    // // blocks until the process indentified by pid_to_wait_for completes
+    // pid_t actual_pid = waitpid(pid, &wstatus, 0);
+    // if (actual_pid == -1) {
+    //   // handle waitpid failure
+    //   fprintf(stderr, "Error: waitpid failure\n");
+    //   exit(1); // exit with 1 is going to terminate the entire process
+    // }
 
-    if (!WIFEXITED(wstatus)) {
-      // subprocess crashed, was interrupted, or did not exit normally
-      // handle as error
-      fprintf(stderr, "Error: subprocess crashed, was interrupted, or did not exit normally\n");
-      exit(1);
-    }
-    if (WEXITSTATUS(wstatus) != 0) {
-      // subprocess returned a non-zero exit code
-      // if following standard UNIX conventions, this is also an error
-      fprintf(stderr, "Error: subprocess returned a non-zero exit code\n");
-      exit(1);
-    }
-    // if pid is not 0, we are in the parent process
-    // WARNING, if the child process path can get here, things will quickly break very badly
+    // if (!WIFEXITED(wstatus)) {
+    //   // subprocess crashed, was interrupted, or did not exit normally
+    //   // handle as error
+    //   fprintf(stderr, "Error: subprocess crashed, was interrupted, or did not exit normally\n");
+    //   exit(1);
+    // }
+    // if (WEXITSTATUS(wstatus) != 0) {
+    //   // subprocess returned a non-zero exit code
+    //   // if following standard UNIX conventions, this is also an error
+    //   fprintf(stderr, "Error: subprocess returned a non-zero exit code\n");
+    //   exit(1);
+    // }
+    // // if pid is not 0, we are in the parent process
+    // // WARNING, if the child process path can get here, things will quickly break very badly
+    size_t mid = (begin+end)/2;
+    merge_sort(arr, begin, mid, threshold);
+    merge_sort(arr, mid, end, threshold);
 
     int64_t temparr[numElements];
     merge(arr, begin, mid, end, temparr);
-
-    for (size_t i = 0; i < end; i++) {
+    for (size_t i = begin; i < end; i++) {
       //update original array
       arr[i] = temparr[i];
     }
