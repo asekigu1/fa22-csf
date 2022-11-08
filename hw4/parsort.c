@@ -77,7 +77,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 
     int wstatus;
     // blocks until the process indentified by pid_to_wait_for completes
-    pid_t actual_pid = waitpid(pid_to_wait_for, &wstatus, 0);
+    pid_t actual_pid = waitpid(pid, &wstatus, 0);
     if (actual_pid == -1) {
         // handle waitpid failure
 
@@ -98,7 +98,9 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     // if pid is not 0, we are in the parent process
     // WARNING, if the child process path can get here, things will quickly break very badly
 
-    int64_t *temparr = new int64_t[end-begin]; //clear temparr
+    int64_t arr[end-begin]; //clear temparr
+    int64_t *temparr;
+    temparr = arr;
     merge(arr, begin, newEnd, end, temparr);
 
     for (size_t i = 0; i < end; i++) {
@@ -174,5 +176,6 @@ int main(int argc, char **argv) {
   }
 
   // TODO: exit with a 0 exit code if sort was successful
-  
+  // TODO: check if sort is successful?
+  return 0;
 }
