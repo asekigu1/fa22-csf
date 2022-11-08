@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold);
 void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr) {
   // TODO: implement
   size_t leftIndex = 0;
@@ -40,8 +41,8 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
   }
 }
 
-cmpvals(const void *p1, const void *p2){
-  return bcmp(*(const int64_t **) p1, *(const int64_t **) p2, sizeof(int64_t));
+int cmpvals(const void *p1, const void *p2){
+  return ( *(size_t*)p1 - *(size_t*)p2 );
 }
 
 int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
@@ -54,7 +55,7 @@ int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // TODO: implement
   if ((end-begin) < threshold ) {
-    qsort(arr, end-begin, sizeof(int64_t*), cmpvals);
+    qsort(arr, end-begin, sizeof(int64_t), cmpvals);
   } else {
     pid_t pid = fork();
     size_t mid = (begin+end)/2;
