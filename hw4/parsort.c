@@ -108,9 +108,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     // if pid is not 0, we are in the parent process
     // WARNING, if the child process path can get here, things will quickly break very badly
 
-    int64_t arr[end-begin]; //clear temparr
-    int64_t *temparr;
-    temparr = arr;
+    int64_t temparr[numElements];
     merge(arr, begin, mid, end, temparr);
 
     for (size_t i = 0; i < end; i++) {
