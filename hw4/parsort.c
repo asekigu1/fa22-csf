@@ -46,7 +46,18 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
 }
 
 int cmpvals(const void *p1, const void *p2){
-  return ( *(int64_t*)p1 - *(int64_t*)p2 );
+  // subtraction isn't sufficient --> overflow (difference can be less than the minimum of int64_t)
+  //return type is int --> int64 can't be converted to 32
+  int64_t left = *(const int64_t*)p1;
+  int64_t right = *(const int64_t*)p2;
+  
+  if (left < right) {
+    return -1;
+  }
+  if (left > right) {
+    return 1;
+  }
+  return 0;
 }
 
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
