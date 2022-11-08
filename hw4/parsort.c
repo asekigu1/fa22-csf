@@ -51,8 +51,9 @@ int cmpvals(const void *p1, const void *p2){
 
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // TODO: implement
-  if ((end-begin) < threshold ) {
-    qsort(arr, end-begin, sizeof(int64_t), cmpvals);
+  size_t numElements = end - begin;
+  if ((numElements) < threshold ) {
+    qsort(arr, numElements, sizeof(int64_t), cmpvals);
   } else {
     pid_t pid = fork();
     size_t mid = (begin+end)/2;
