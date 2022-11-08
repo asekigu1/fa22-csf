@@ -12,7 +12,6 @@
 
 void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr);
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold);
-int cmpvals(const void *p1, const void *p2);
 int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold);
 
 
@@ -46,6 +45,9 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
   }
 }
 
+int cmpvals(const void *p1, const void *p2){
+  return ( *(int64_t*)p1 - *(int64_t*)p2 );
+}
 
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // TODO: implement
@@ -106,9 +108,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   
 }
 
-int cmpvals(const void *p1, const void *p2){
-  return ( *(size_t*)p1 - *(size_t*)p2 );
-}
+
 
 int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // this is now in the child process
