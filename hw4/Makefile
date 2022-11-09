@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -g3 -Wall
 
 SRCS = parsort.c is_sorted.c gen_rand_data.c
 OBJS = $(SRCS:%.c=%.o)

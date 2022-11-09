@@ -19,7 +19,7 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
   // TODO: implement
   size_t leftIndex = begin;
   size_t rightIndex = mid;
-  size_t tempIndex = begin;
+  size_t tempIndex = 0;
 
   while ((leftIndex < mid) && (rightIndex < end)) {
     if (arr[leftIndex] <= arr[rightIndex]) {
@@ -70,9 +70,12 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   }
   size_t numElements = end - begin;
   if ((numElements) <= threshold ) {
-    qsort(arr, numElements, sizeof(int64_t), cmpvals);
+
+    
+    qsort(arr+begin, numElements, sizeof(int64_t), cmpvals);
+    
   } else {
-    // lines 70~110 are fork() implementation
+    //lines 70~110 are fork() implementation
     // pid_t pid = fork();
     // size_t mid = (begin+end)/2;
     // if (pid == -1) {
@@ -111,21 +114,22 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     //   fprintf(stderr, "Error: subprocess returned a non-zero exit code\n");
     //   exit(1);
     // }
-    // // if pid is not 0, we are in the parent process
+    // if pid is not 0, we are in the parent process
     // // WARNING, if the child process path can get here, things will quickly break very badly
-    size_t mid = (begin+end)/2;
+    size_t mid = (end+begin)/2;
+
     merge_sort(arr, begin, mid, threshold);
     merge_sort(arr, mid, end, threshold);
 
+    //malloc size of int64
     int64_t temparr[numElements];
     merge(arr, begin, mid, end, temparr);
-    memcpy(arr + begin, temparr, sizeof(int64_t) * numElements);
-    // for (size_t i = begin; i < end; i++) {
-    //   //update original array
-    //   arr[i] = temparr[i];
-    // }
+
+    for (size_t i = begin; i < end; i++) {
+      //update original array
+      arr[i] = temparr[i-begin];
+    }
   }
-  
 }
 
 
