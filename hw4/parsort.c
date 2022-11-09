@@ -69,7 +69,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     return;
   }
   size_t numElements = end - begin;
-  if ((numElements) < threshold ) {
+  if ((numElements) <= threshold ) {
     qsort(arr, numElements, sizeof(int64_t), cmpvals);
   } else {
     // lines 70~110 are fork() implementation
@@ -119,10 +119,11 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
 
     int64_t temparr[numElements];
     merge(arr, begin, mid, end, temparr);
-    for (size_t i = begin; i < end; i++) {
-      //update original array
-      arr[i] = temparr[i];
-    }
+    memcpy(arr + begin, temparr, sizeof(int64_t) * numElements);
+    // for (size_t i = begin; i < end; i++) {
+    //   //update original array
+    //   arr[i] = temparr[i];
+    // }
   }
   
 }
@@ -136,69 +137,81 @@ int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // TODO: a child process not exiting normally, or exiting with a non-zero exit code?
 }
 
-int main(int argc, char **argv) {
-  // check for correct number of command line arguments
-  if (argc != 3) {
-    fprintf(stderr, "Usage: %s <filename> <sequential threshold>\n", argv[0]);
-    return 1;
+int main(int arg, char **argv) {
+  int64_t arr[5] = {5, 4, 3, 2, 1};
+  for(size_t loop = 0; loop < 5; loop++) {
+    printf("%d ", (int) arr[loop]);
   }
+  printf("\n ");
+  merge_sort(arr, 0, 5, 2);
+  for(size_t loop = 0; loop < 5; loop++) {
+    printf("%d ", (int) arr[loop]);
+  }
+}
 
-  // process command line arguments
-  const char *filename = argv[1];
-  char *end;
-  size_t threshold = (size_t) strtoul(argv[2], &end, 10);
-  if (end != argv[2] + strlen(argv[2])) {
-    /* TODO: report an error (threshold value is invalid) */;
-    fprintf(stderr, "Error: invalid threshold value\n");
-    return 1;
-  }
+// int main(int argc, char **argv) {
+//   // check for correct number of command line arguments
+//   if (argc != 3) {
+//     fprintf(stderr, "Usage: %s <filename> <sequential threshold>\n", argv[0]);
+//     return 1;
+//   }
+
+//   // process command line arguments
+//   const char *filename = argv[1];
+//   char *end;
+//   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
+//   if (end != argv[2] + strlen(argv[2])) {
+//     /* TODO: report an error (threshold value is invalid) */;
+//     fprintf(stderr, "Error: invalid threshold value\n");
+//     return 1;
+//   }
     
 
-  // TODO: open the file
-  int fd = open(filename, O_RDWR);
-  if (fd < 0) {
-    // file couldn't be opened: handle error and exit
-    fprintf(stderr, "Error: file couldn't be opened\n");
-    return 1;
-  }
+//   // TODO: open the file
+//   int fd = open(filename, O_RDWR);
+//   if (fd < 0) {
+//     // file couldn't be opened: handle error and exit
+//     fprintf(stderr, "Error: file couldn't be opened\n");
+//     return 1;
+//   }
 
-  // TODO: use fstat to determine the size of the file
-  struct stat statbuf;
-  int rc = fstat(fd, &statbuf);
-  if (rc != 0) {
-    // handle fstat error and exit
-    fprintf(stderr, "Error: fstat did not execute corretly\n");
-    return 1;
-  }
-  size_t file_size_in_bytes = statbuf.st_size;
+//   // TODO: use fstat to determine the size of the file
+//   struct stat statbuf;
+//   int rc = fstat(fd, &statbuf);
+//   if (rc != 0) {
+//     // handle fstat error and exit
+//     fprintf(stderr, "Error: fstat did not execute corretly\n");
+//     return 1;
+//   }
+//   size_t file_size_in_bytes = statbuf.st_size;
 
-  // TODO: map the file into memory using mmap
-  int64_t *data = mmap(NULL, file_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  if (data == MAP_FAILED) {
-    // handle mmap error and exit
-    fprintf(stderr, "Error: mmap did not execute correctly\n");
-    return 1;
-  }
-  // *data now behaves like a standard array of int64_t. Be careful though! Going off the end
-  // of the array will silently extend the file, which can rapidly lead to disk space
-  // depletion!
+//   // TODO: map the file into memory using mmap
+//   int64_t *data = mmap(NULL, file_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+//   if (data == MAP_FAILED) {
+//     // handle mmap error and exit
+//     fprintf(stderr, "Error: mmap did not execute correctly\n");
+//     return 1;
+//   }
+//   // *data now behaves like a standard array of int64_t. Be careful though! Going off the end
+//   // of the array will silently extend the file, which can rapidly lead to disk space
+//   // depletion!
 
-  // TODO: sort the data!
-  size_t numElements = file_size_in_bytes/sizeof(int64_t);
-  merge_sort(data, 0, numElements, threshold);
+//   // TODO: sort the data!
+//   size_t numElements = file_size_in_bytes/sizeof(int64_t);
+//   merge_sort(data, 0, numElements, threshold);
 
-  // TODO: unmap and close the file
-  int retVal = munmap(data, file_size_in_bytes);
-  if (retVal == -1) {
-    fprintf(stderr, "Error: failure to munmap the file data\n");
-    return 1;
-  }
-  retVal = close(fd);
-  if (retVal == -1) {
-    fprintf(stderr, "Error: failure to close the file\n");
-    return 1;
-  }
+//   // TODO: unmap and close the file
+//   int retVal = munmap(data, file_size_in_bytes);
+//   if (retVal == -1) {
+//     fprintf(stderr, "Error: failure to munmap the file data\n");
+//     return 1;
+//   }
+//   retVal = close(fd);
+//   if (retVal == -1) {
+//     fprintf(stderr, "Error: failure to close the file\n");
+//     return 1;
+//   }
 
-  // TODO: exit with a 0 exit code if sort was successful
-  return 0;
-}
+//   // TODO: exit with a 0 exit code if sort was successful
+//   return 0;
+// }
