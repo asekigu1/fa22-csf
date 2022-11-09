@@ -106,6 +106,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     if (actual_pid == -1) {
       // handle waitpid failure
       fprintf(stderr, "Error: waitpid failure\n");
+      waitpid(pid1, NULL, 0);
       exit(1); // exit with 1 is going to terminate the entire process
     }
 
@@ -113,12 +114,14 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
       // subprocess crashed, was interrupted, or did not exit normally
       // handle as error
       fprintf(stderr, "Error: subprocess crashed, was interrupted, or did not exit normally\n");
+      waitpid(pid1, NULL, 0);
       exit(1);
     }
     if (WEXITSTATUS(wstatus) != 0) {
       // subprocess returned a non-zero exit code
       // if following standard UNIX conventions, this is also an error
       fprintf(stderr, "Error: subprocess returned a non-zero exit code\n");
+      waitpid(pid1, NULL, 0);
       exit(1);
     }
 
