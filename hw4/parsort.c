@@ -72,7 +72,7 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   if ((numElements) < threshold ) {
     qsort(arr, numElements, sizeof(int64_t), cmpvals);
   } else {
-    // lines 70~110 are fork() implementation
+    //lines 70~110 are fork() implementation
     // pid_t pid = fork();
     // size_t mid = (begin+end)/2;
     // if (pid == -1) {
@@ -111,11 +111,11 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     //   fprintf(stderr, "Error: subprocess returned a non-zero exit code\n");
     //   exit(1);
     // }
-    // // if pid is not 0, we are in the parent process
+    // if pid is not 0, we are in the parent process
     // // WARNING, if the child process path can get here, things will quickly break very badly
-    size_t mid = (begin+end)/2;
+    size_t mid = (end+begin)/2;
     merge_sort(arr, begin, mid, threshold);
-    merge_sort(arr, mid, end, threshold);
+    merge_sort(arr, mid+1, end, threshold);
 
     int64_t temparr[numElements];
     merge(arr, begin, mid, end, temparr);
