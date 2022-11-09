@@ -19,7 +19,7 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
   // TODO: implement
   size_t leftIndex = begin;
   size_t rightIndex = mid;
-  size_t tempIndex = begin;
+  size_t tempIndex = 0;
 
   while ((leftIndex < mid) && (rightIndex < end)) {
     if (arr[leftIndex] <= arr[rightIndex]) {
@@ -69,8 +69,11 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     return;
   }
   size_t numElements = end - begin;
-  if ((numElements) < threshold ) {
-    qsort(arr, numElements, sizeof(int64_t), cmpvals);
+  if ((numElements) <= threshold ) {
+    
+    qsort(arr+begin, numElements, sizeof(int64_t), cmpvals);
+    
+    
   } else {
     //lines 70~110 are fork() implementation
     // pid_t pid = fork();
@@ -114,15 +117,19 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     // if pid is not 0, we are in the parent process
     // // WARNING, if the child process path can get here, things will quickly break very badly
     size_t mid = (end+begin)/2;
-    merge_sort(arr, begin, mid, threshold);
-    merge_sort(arr, mid+1, end, threshold);
 
+    merge_sort(arr, begin, mid, threshold);
+    merge_sort(arr, mid, end, threshold);
+
+    //malloc size of int64
     int64_t temparr[numElements];
     merge(arr, begin, mid, end, temparr);
+
     for (size_t i = begin; i < end; i++) {
       //update original array
-      arr[i] = temparr[i];
+      arr[i] = temparr[i-begin];
     }
+    
   }
   
 }

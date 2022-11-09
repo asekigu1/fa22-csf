@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RAND_SEED 1
+#define RAND_SEED 0
 
 int main(int argc, char **argv) {
   if (argc != 3) {
