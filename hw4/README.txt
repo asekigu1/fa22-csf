@@ -1,5 +1,11 @@
 Name: Aimi Sekiguchi
 JHED: asekigu1
+Contributions: main(), parallel implementation
+
+Name: Ryad Taleb
+JHED: 
+Contributions: Mergesort() original implementation, debugging
+
 
 TODO: write a brief summary of how each team member contributed to
 the project.
@@ -7,7 +13,6 @@ the project.
 we both worked together on all functions
 
 REPORT
-
 TODO: add your report according to the instructions in the
 "Experiments and analysis" section of the assignment description.
 
