@@ -4,38 +4,53 @@ JHED: asekigu1
 TODO: write a brief summary of how each team member contributed to
 the project.
 
+we both worked together on all functions
+
 REPORT
 
 TODO: add your report according to the instructions in the
 "Experiments and analysis" section of the assignment description.
-real    0m0.950s
-user    0m0.912s
-sys     0m0.029s
 
-real    0m0.578s
-user    0m0.998s
-sys     0m0.057s
+Threshold: 2097152 
+real    0m0.985s
+user    0m0.942s
+sys     0m0.032s
 
-real    0m0.315s
-user    0m0.760s
-sys     0m0.084s
+Threshold: 1048576
+real    0m0.634s
+user    0m1.076s
+sys     0m0.074s
 
-real    0m0.260s
-user    0m0.797s
-sys     0m0.131s
+Threshold: 524288
+real    0m0.318s
+user    0m0.765s
+sys     0m0.090s
 
-real    0m0.228s
-user    0m0.907s
-sys     0m0.181s
+Threshold: 262144
+real    0m0.247s
+user    0m0.800s
+sys     0m0.122s
 
-real    0m0.190s
-user    0m0.892s
-sys     0m0.234s
+Threshold: 131072
+real    0m0.229s
+user    0m0.909s
+sys     0m0.180s
 
-real    0m0.170s
-user    0m0.879s
-sys     0m0.301s
+Threshold: 65536
+real    0m0.214s
+user    0m0.921s
+sys     0m0.218s
 
-real    0m0.242s
-user    0m0.937s
-sys     0m0.444s
+Threshold: 32768
+real    0m0.200s
+user    0m0.896s
+sys     0m0.329s
+
+Threshold: 16384
+real    0m0.186s
+user    0m0.929s
+sys     0m0.461s
+
+
+As the threshold decreases qsort is called later into the process and our array has been sorted more, making the process quicker.
+More processes will be merging instead of q sorting, ie we will have more merge processes running in parallel with a lower threshold.
