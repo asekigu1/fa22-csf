@@ -1,16 +1,11 @@
 Name: Aimi Sekiguchi
 JHED: asekigu1
-Contributions: main(), parallel implementation
+Contributions: main(), parallel mergesort implementation
 
 Name: Ryad Taleb
 JHED: 
 Contributions: Mergesort() original implementation, debugging
 
-
-TODO: write a brief summary of how each team member contributed to
-the project.
-
-we both worked together on all functions
 
 REPORT
 TODO: add your report according to the instructions in the
@@ -55,6 +50,5 @@ Threshold: 16384
 real    0m0.186s
 user    0m0.929s
 sys     0m0.461s
-
 
 As the threshold decreases qsort is called later into the process and our array has been sorted more, making the process quicker.

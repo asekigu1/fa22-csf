@@ -14,9 +14,7 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold);
 int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold);
 
-
 void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr) {
-  // TODO: implement
   size_t leftIndex = begin;
   size_t rightIndex = mid;
   size_t tempIndex = 0;
@@ -43,8 +41,6 @@ void merge(int64_t *arr, size_t begin, size_t mid, size_t end, int64_t *temparr)
     rightIndex++;
     tempIndex++;
   }
-
-  
 }
 
 int cmpvals(const void *p1, const void *p2){
@@ -64,18 +60,13 @@ int cmpvals(const void *p1, const void *p2){
 }
 
 void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
-  // TODO: implement
   if (begin >= end) {
     return;
   }
   size_t numElements = end - begin;
   if ((numElements) <= threshold ) {
-    
     qsort(arr+begin, numElements, sizeof(int64_t), cmpvals);
-    
-    
   } else {
-    //lines 70~110 are fork() implementation
     pid_t pid = fork();
     size_t mid = (begin+end)/2;
     if (pid == -1) {
@@ -150,12 +141,9 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
     // // WARNING, if the child process path can get here, things will quickly break very badly
     
 
-   
-
     //malloc size of int64
     int64_t* temparr;
     temparr = malloc(sizeof(int64_t)*numElements);
-
     merge(arr, begin, mid, end, temparr);
 
     for (size_t i = begin; i < end; i++) {
@@ -163,20 +151,14 @@ void merge_sort(int64_t *arr, size_t begin, size_t end, size_t threshold) {
       arr[i] = temparr[i-begin];
     }
     free(temparr);
-
-    
   }
 
-  
 }
-
-
 
 int do_child_work(int64_t *arr, size_t begin, size_t end, size_t threshold) {
   // this is now in the child process
   merge_sort(arr, begin, end, threshold);
   return 0;
-  // TODO: a child process not exiting normally, or exiting with a non-zero exit code?
 }
 
 int main(int argc, char **argv) {
@@ -191,13 +173,13 @@ int main(int argc, char **argv) {
   char *end;
   size_t threshold = (size_t) strtoul(argv[2], &end, 10);
   if (end != argv[2] + strlen(argv[2])) {
-    /* TODO: report an error (threshold value is invalid) */;
+    /* report an error (threshold value is invalid) */;
     fprintf(stderr, "Error: invalid threshold value\n");
     return 1;
   }
     
 
-  // TODO: open the file
+  // open the file
   int fd = open(filename, O_RDWR);
   if (fd < 0) {
     // file couldn't be opened: handle error and exit
@@ -205,7 +187,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // TODO: use fstat to determine the size of the file
+  // use fstat to determine the size of the file
   struct stat statbuf;
   int rc = fstat(fd, &statbuf);
   if (rc != 0) {
@@ -215,7 +197,7 @@ int main(int argc, char **argv) {
   }
   size_t file_size_in_bytes = statbuf.st_size;
 
-  // TODO: map the file into memory using mmap
+  // map the file into memory using mmap
   int64_t *data = mmap(NULL, file_size_in_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   if (data == MAP_FAILED) {
     // handle mmap error and exit
@@ -226,11 +208,11 @@ int main(int argc, char **argv) {
   // of the array will silently extend the file, which can rapidly lead to disk space
   // depletion!
 
-  // TODO: sort the data!
+  // sort the data!
   size_t numElements = file_size_in_bytes/sizeof(int64_t);
   merge_sort(data, 0, numElements, threshold);
 
-  // TODO: unmap and close the file
+  // unmap and close the file
   int retVal = munmap(data, file_size_in_bytes);
   if (retVal == -1) {
     fprintf(stderr, "Error: failure to munmap the file data\n");
@@ -242,6 +224,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // TODO: exit with a 0 exit code if sort was successful
+  // exit with a 0 exit code if sort was successful
   return 0;
 }
