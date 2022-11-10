@@ -58,4 +58,3 @@ sys     0m0.461s
 
 
 As the threshold decreases qsort is called later into the process and our array has been sorted more, making the process quicker.
-More processes will be merging instead of q sorting, ie we will have more merge processes running in parallel with a lower threshold.
