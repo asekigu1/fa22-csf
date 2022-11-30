@@ -77,7 +77,7 @@ bool Connection::receive(Message &msg) {
       // trim new line or CR if it exists
       msg.data.pop_back();
     }
-    // successfully logged in
+    // successfully received
 
   } else {
     // if string lngth is <0, then error.
