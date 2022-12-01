@@ -36,13 +36,13 @@ int main(int argc, char **argv) {
   login_msg.data = username;
   bool success = conn.send(login_msg);
   if (!success) {
-    std::cerr << "Unsuccessful send attempt" << std::endl;
+    std::cerr << "Unsuccessful send attempt at login" << std::endl;
   }
   // read response from server
   Message received;
   success = conn.receive(received);
   if (!success) {
-    std::cerr << "Unsuccessful receive attempt" << std::endl;
+    std::cerr << "Unsuccessful receive attempt at login" << std::endl;
   }
   if (received.tag == "ok") {
     // good
@@ -58,12 +58,12 @@ int main(int argc, char **argv) {
   join_msg.data = room_name;
   success = conn.send(join_msg);
   if (!success) {
-    std::cerr << "Unsuccessful send attempt" << std::endl;
+    std::cerr << "Unsuccessful send attempt at join" << std::endl;
   }
   // read response from server
   success = conn.receive(received);
   if (!success) {
-    std::cerr << "Unsuccessful receive attempt" << std::endl;
+    std::cerr << "Unsuccessful receive attempt at join" << std::endl;
   }
   if (received.tag == "ok") {
     // good
