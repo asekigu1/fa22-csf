@@ -49,8 +49,6 @@ int main(int argc, char **argv) {
     // good
   } else if (received.tag == "err") {
     std::cerr << received.data;
-    conn.close();
-    return 1;
   }
 
   // TODO: loop reading commands from user, sending messages to
@@ -70,13 +68,6 @@ int main(int argc, char **argv) {
     
     Message sending;
     if (s.front() == '/') {
-      /*
-      if (s == "/quit") {
-        
-        conn.close();
-        return 1;
-      }
-      */
       
       std::string delimiter = " ";
       
@@ -102,21 +93,6 @@ int main(int argc, char **argv) {
     }
     
       
-    /*
-    if (s== "quit") {
-      sending.tag = "quit";
-      sending.data = "";
-    } else if (s == "leave") {
-      sending.tag = "leave";
-      sending.data = "";
-    } else if (s.substr(0,4) == "join") {
-      sending.tag = "join";
-      sending.data = s.substr(5, s.length());
-    } else {
-      sending.tag = username;
-      sending.data = s;
-    }
-    */
 
     bool success = conn.send(sending);
 
@@ -134,14 +110,12 @@ int main(int argc, char **argv) {
       // good
     } else if (received.tag == "err") {
       std::cerr << received.data;
-      conn.close();
-      return 1;
     }
 
     if (sending.tag == "quit") {
       sending.data = "bye";
       conn.close();
-      return 1;
+      return 0;
     }
 
   }

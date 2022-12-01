@@ -82,7 +82,11 @@ int main(int argc, char **argv) {
   //       (which should be tagged with TAG_DELIVERY)
   while (conn.receive(received)) {
     if (received.tag == "delivery") {
-      std::cout << received.data;
+      std::string delimiter = ":";
+      std::string temp = received.data.substr(received.data.find(delimiter)+1, received.data.length());
+      std::string name = temp.substr(0, temp.find(delimiter)+1); // include colon
+      std::string text = temp.substr(temp.find(delimiter)+1, temp.length()); // exclude colon
+      std::cout << name << " " << text;
     }
   }
 
