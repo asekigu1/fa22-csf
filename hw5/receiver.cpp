@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
   conn.connect(server_hostname, server_port);
   if (!conn.is_open()) {
     std::cerr << "Couldn't connect to server" << std::endl;
+    return 1;
   }
 
   // TODO: send rlogin and join messages (expect a response from
@@ -37,17 +38,19 @@ int main(int argc, char **argv) {
   bool success = conn.send(login_msg);
   if (!success) {
     std::cerr << "Unsuccessful send attempt at login" << std::endl;
+    return 1;
   }
   // read response from server
   Message received;
   success = conn.receive(received);
   if (!success) {
     std::cerr << "Unsuccessful receive attempt at login" << std::endl;
+    return 1;
   }
   if (received.tag == "ok") {
     // good
   } else if (received.tag == "err") {
-    std::cerr << received.data << std::endl;
+    std::cerr << received.data;
     conn.close();
     return 1;
   }
@@ -59,16 +62,18 @@ int main(int argc, char **argv) {
   success = conn.send(join_msg);
   if (!success) {
     std::cerr << "Unsuccessful send attempt at join" << std::endl;
+    return 1;
   }
   // read response from server
   success = conn.receive(received);
   if (!success) {
     std::cerr << "Unsuccessful receive attempt at join" << std::endl;
+    return 1;
   }
   if (received.tag == "ok") {
     // good
   } else if (received.tag == "err") {
-    std::cerr << received.data << std::endl;
+    std::cerr << received.data;
     conn.close();
     return 1;
   }
@@ -77,7 +82,7 @@ int main(int argc, char **argv) {
   //       (which should be tagged with TAG_DELIVERY)
   while (conn.receive(received)) {
     if (received.tag == "delivery") {
-      std::cout << received.data << std::endl;
+      std::cout << received.data;
     }
   }
 

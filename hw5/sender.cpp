@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
   conn.connect(server_hostname, server_port);
   if (!conn.is_open()) {
     std::cerr << "Couldn't connect to server" << std::endl;
+    return 1;
   }
   
 
@@ -34,6 +35,7 @@ int main(int argc, char **argv) {
   bool success = conn.send(login_msg);
   if (!success) {
     std::cerr << "Unsuccessful send attempt" << std::endl;
+    return 1;
   }
   
   // read response from server
@@ -46,7 +48,7 @@ int main(int argc, char **argv) {
   if (received.tag == "ok") {
     // good
   } else if (received.tag == "err") {
-    std::cerr << received.data << std::endl;
+    std::cerr << received.data;
     conn.close();
     return 1;
   }
@@ -77,8 +79,12 @@ int main(int argc, char **argv) {
       */
       
       std::string delimiter = " ";
-     
+      
       sending.tag = s.substr(1, s.find(delimiter)-1);
+      if (sending.tag != "join" && sending.tag != "quit" && sending.tag != "leave") {
+        std::cerr << "Valid commands are /join /quit and /leave" << std::endl;
+        continue;
+      }
       
     
       sending.data = s.substr(s.find(delimiter)+1);
@@ -127,7 +133,7 @@ int main(int argc, char **argv) {
     if (received.tag == "ok") {
       // good
     } else if (received.tag == "err") {
-      std::cerr << received.data << std::endl;
+      std::cerr << received.data;
       conn.close();
       return 1;
     }
