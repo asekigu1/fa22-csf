@@ -17,7 +17,6 @@ int main(int argc, char **argv) {
   int server_port = std::stoi(argv[2]);
   std::string username = argv[3];
   std::string room_name = argv[4];
-
   Connection conn;
 
   // TODO: connect to server
@@ -26,6 +25,7 @@ int main(int argc, char **argv) {
   if (!conn.is_open()) {
     std::cerr << "Couldn't connect to server" << std::endl;
     return 1;
+    // return 1 if server connect fails
   }
 
   // TODO: send rlogin and join messages (expect a response from
@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
   Message login_msg;
   login_msg.tag = "rlogin";
   login_msg.data = username;
+  // send to server
   bool success = conn.send(login_msg);
   if (!success) {
     std::cerr << "Unsuccessful send attempt at login" << std::endl;
@@ -59,6 +60,7 @@ int main(int argc, char **argv) {
   Message join_msg;
   join_msg.tag = "join";
   join_msg.data = room_name;
+  // send to server
   success = conn.send(join_msg);
   if (!success) {
     std::cerr << "Unsuccessful send attempt at join" << std::endl;
@@ -82,6 +84,7 @@ int main(int argc, char **argv) {
   //       (which should be tagged with TAG_DELIVERY)
   while (conn.receive(received)) {
     if (received.tag == "delivery") {
+      // print "name: message" to cout
       std::string delimiter = ":";
       std::string temp = received.data.substr(received.data.find(delimiter)+1, received.data.length());
       std::string name = temp.substr(0, temp.find(delimiter)+1); // include colon
@@ -90,7 +93,7 @@ int main(int argc, char **argv) {
     }
   }
 
-
+  // close connection
   conn.close();
   return 0;
 }
