@@ -35,7 +35,6 @@ int main(int argc, char **argv) {
   bool success = conn.send(login_msg);
   if (!success) {
     std::cerr << "Unsuccessful send attempt" << std::endl;
-    return 1;
   }
   
   // read response from server
@@ -49,6 +48,7 @@ int main(int argc, char **argv) {
     // good
   } else if (received.tag == "err") {
     std::cerr << received.data;
+    return 1;
   }
 
   // TODO: loop reading commands from user, sending messages to
