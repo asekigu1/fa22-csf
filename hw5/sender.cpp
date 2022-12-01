@@ -40,7 +40,6 @@ int main(int argc, char **argv) {
   // read response from server
   Message received;
   success = conn.receive(received);
-  
   if (!success) {
     std::cerr << "Unsuccessful receive attempt" << std::endl;
   }
@@ -54,16 +53,14 @@ int main(int argc, char **argv) {
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
   int c = 1;
-  
   while (c) {
     
     std::string s;
     getline(std::cin, s);
     
-     if ((s.back() == '\0') || (s.back() == '\r')) {
+    if ((s.back() == '\0') || (s.back() == '\r')) {
       // trim new line or CR if it exists
       s.pop_back();
-      
     }
     
     Message sending;
@@ -71,33 +68,25 @@ int main(int argc, char **argv) {
       
       std::string delimiter = " ";
       
+      // save command without "/"
       sending.tag = s.substr(1, s.find(delimiter)-1);
       if (sending.tag != "join" && sending.tag != "quit" && sending.tag != "leave") {
         std::cerr << "Valid commands are /join /quit and /leave" << std::endl;
         continue;
       }
       
-    
+      // part after command
       sending.data = s.substr(s.find(delimiter)+1);
       
-      
-      if ((sending.data.back() == '\0') || (sending.data.back() == '\r')) {
-        // trim new line or CR if it exists
-        sending.data.pop_back();
-      }
-      
     }else{
+      // sending message
       sending.tag = "sendall";
       sending.data = s;
 
     }
     
-      
-
+    // send message to server
     bool success = conn.send(sending);
-
-    
-    
     if (!success) {
       std::cerr << "Unsuccessful send attempt" << std::endl;
     }
