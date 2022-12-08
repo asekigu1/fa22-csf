@@ -35,7 +35,7 @@ void *worker(void *arg) {
   struct Connection *info = (Connection*) arg;
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
-
+  
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
