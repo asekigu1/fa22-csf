@@ -4,13 +4,10 @@
 #include <map>
 #include <string>
 #include <pthread.h>
+#include "connection.h"
 class Room;
 
-struct Info{
-  Connection* conn_info;
-  Server* server;
-  Info(Connection*);
-};
+
 
 class Server {
 public:
@@ -40,6 +37,12 @@ private:
   int m_ssock;
   RoomMap m_rooms;
   pthread_mutex_t m_lock;
+};
+
+struct Info{
+  Connection* conn_info;
+  Server* server;
+  Info(Connection*);
 };
 
 #endif // SERVER_H

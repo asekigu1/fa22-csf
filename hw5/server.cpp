@@ -46,6 +46,9 @@ void *worker(void *arg) {
   else if (request.tag == TAG_SLOGIN) {
     info->server->chat_with_sender();
   }
+  else if (request.tag == TAG_RLOGIN) {
+    info->server->chat_with_receiver();
+  }
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
@@ -54,14 +57,15 @@ void *worker(void *arg) {
   return nullptr;
 }
 
+
+}
+
 void Server::chat_with_sender() {
   //
 }
 
 void Server::chat_with_receiver() {
   //
-}
-
 }
 
 Info::Info(Connection* conn) {
@@ -108,7 +112,7 @@ void Server::handle_client_requests() {
     }
     Connection* con_info = new Connection(clientfd);
     Info* info = new Info(con_info);
-    
+    info->server = this;
     
     pthread_t thread;
     int rc = pthread_create(&thread, NULL, worker, info);
