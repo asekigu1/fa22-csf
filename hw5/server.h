@@ -6,6 +6,12 @@
 #include <pthread.h>
 class Room;
 
+struct Info{
+  Connection* conn_info;
+  Server* server;
+  Info(Connection*);
+};
+
 class Server {
 public:
   Server(int port);
@@ -16,6 +22,10 @@ public:
   void handle_client_requests();
 
   Room *find_or_create_room(const std::string &room_name);
+
+  void chat_with_sender();
+
+  void chat_with_receiver();
 
 private:
   // prohibit value semantics

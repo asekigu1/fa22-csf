@@ -32,12 +32,20 @@ void *worker(void *arg) {
   // TODO: use a static cast to convert arg from a void* to
   //       whatever pointer type describes the object(s) needed
   //       to communicate with a client (sender or receiver)
-  User *info = new User;
-  info = (User*) arg;
+  
+  Info* info = (Info*) arg;
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
   //server object and connection
-  info->conn_info = new Connection()
+  Message request;
+  
+  bool success = info->conn_info->receive(request);
+  if (!success) {
+    std::cerr << "Error receiving message";
+  }
+  else if (request.tag == TAG_SLOGIN) {
+    info->server->chat_with_sender();
+  }
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
@@ -45,14 +53,20 @@ void *worker(void *arg) {
 
   return nullptr;
 }
-void chat_with_sender() {
+
+void Server::chat_with_sender() {
+  //
+}
+
+void Server::chat_with_receiver() {
+  //
+}
 
 }
 
-void chat_with_receiver() {
-
-}
-
+Info::Info(Connection* conn) {
+  this->conn_info = conn;
+  
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -92,8 +106,12 @@ void Server::handle_client_requests() {
     if (clientfd < 0) {
       std::cerr << "Error accepting client connection";
     }
-    User *info = new User;
+    Connection* con_info = new Connection(clientfd);
+    Info* info = new Info(con_info);
     
+    
+    pthread_t thread;
+    int rc = pthread_create(&thread, NULL, worker, info);
 
 
     //server object
