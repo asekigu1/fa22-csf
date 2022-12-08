@@ -32,7 +32,7 @@ void *worker(void *arg) {
   // TODO: use a static cast to convert arg from a void* to
   //       whatever pointer type describes the object(s) needed
   //       to communicate with a client (sender or receiver)
-
+  struct Connection *info = (Connection*) arg;
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
 
@@ -68,6 +68,15 @@ bool Server::listen() {
 void Server::handle_client_requests() {
   // TODO: infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
+  while(1) {
+    int serverfd;
+    int clientfd = Accept(serverfd, NULL, NULL);
+    if (clientfd < 0) {
+      std::cerr << "Error accepting client connection";
+    }
+    struct Connection *info = (Connection*) malloc(sizeof(struct Connection));
+
+  }
 }
 
 Room *Server::find_or_create_room(const std::string &room_name) {
