@@ -32,16 +32,25 @@ void *worker(void *arg) {
   // TODO: use a static cast to convert arg from a void* to
   //       whatever pointer type describes the object(s) needed
   //       to communicate with a client (sender or receiver)
-  struct Connection *info = (Connection*) arg;
+  User *info = new User;
+  info = (User*) arg;
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
-  
+  //server object and connection
+  info->conn_info = new Connection()
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
   //       is a good idea)
 
   return nullptr;
+}
+void chat_with_sender() {
+
+}
+
+void chat_with_receiver() {
+
 }
 
 }
@@ -54,10 +63,12 @@ Server::Server(int port)
   : m_port(port)
   , m_ssock(-1) {
   // TODO: initialize mutex
+  pthread_mutex_init(&m_lock, NULL);
 }
 
 Server::~Server() {
   // TODO: destroy mutex
+  pthread_mutex_destroy(&m_lock);
 }
 
 bool Server::listen() {
@@ -81,7 +92,13 @@ void Server::handle_client_requests() {
     if (clientfd < 0) {
       std::cerr << "Error accepting client connection";
     }
-    struct Connection *info = (Connection*) malloc(sizeof(struct Connection));
+    User *info = new User;
+    
+
+
+    //server object
+    
+
 
   }
 }

@@ -43,6 +43,8 @@ public:
 
   Result get_last_result() const { return m_last_result; }
 
+  
+
 private:
   // prohibit value semantics
   Connection(const Connection &);
@@ -54,5 +56,7 @@ private:
   rio_t m_fdbuf; // used to allow buffered input
   Result m_last_result;
 };
+
+
 
 #endif // CONNECTION_H

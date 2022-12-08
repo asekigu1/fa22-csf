@@ -1,12 +1,13 @@
 #include <cassert>
 #include <ctime>
 #include "message_queue.h"
+#include "guard.h"
 
 MessageQueue::MessageQueue() {
   // TODO: initialize the mutex and the semaphore
   pthread_mutex_init(&m_lock, NULL);
   //set max connections to 15?
-  sem_init(&m_avail, 0,15);
+  sem_init(&m_avail, 0,0);
   
 }
 
@@ -17,11 +18,13 @@ MessageQueue::~MessageQueue() {
 }
 
 void MessageQueue::enqueue(Message *msg) {
+  {  Guard g(m_lock);
   // TODO: put the specified message on the queue
   m_messages.push_back(msg);
   // be sure to notify any thread waiting for a message to be
   // available by calling sem_post
   sem_post(&m_avail);
+  }
 }
 
 Message *MessageQueue::dequeue() {

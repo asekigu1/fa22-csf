@@ -4,8 +4,11 @@
 #include <string>
 #include <set>
 #include <pthread.h>
-
-struct User;
+#include "connection.h"
+struct User {
+  Connection* conn_info;
+  int m_ssock;
+};
 
 // A Room object is a representation of a chat room.
 // At a minimum, it should keep track of the User objects representing
