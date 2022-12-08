@@ -63,14 +63,21 @@ Server::~Server() {
 bool Server::listen() {
   // TODO: use open_listenfd to create the server socket, return true
   //       if successful, false if not
+  std::string s = std::to_string(m_port);
+  char const *c_m_port = s.c_str();
+  if (open_listenfd(c_m_port) < 0) {
+    return false;
+  }
+  return true;
+
+
 }
 
 void Server::handle_client_requests() {
   // TODO: infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
   while(1) {
-    int serverfd;
-    int clientfd = Accept(serverfd, NULL, NULL);
+   int clientfd = Accept(m_ssock, NULL, NULL);
     if (clientfd < 0) {
       std::cerr << "Error accepting client connection";
     }
