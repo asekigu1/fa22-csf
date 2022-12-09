@@ -44,10 +44,10 @@ void *worker(void *arg) {
     std::cerr << "Error receiving message";
   }
   else if (request.tag == TAG_SLOGIN) {
-    info->server->chat_with_sender();
+    info->server->chat_with_sender(info);
   }
   else if (request.tag == TAG_RLOGIN) {
-    info->server->chat_with_receiver();
+    info->server->chat_with_receiver(info);
   }
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
@@ -60,12 +60,26 @@ void *worker(void *arg) {
 
 }
 
-void Server::chat_with_sender() {
+void Server::chat_with_sender(Info* info) {
   //
+  while(1) {
+    Message request;
+    bool success = info->conn_info->receive(request);
+    if (!success) {
+      std::cerr << "Error receiving message";
+    }
+  }
+
 }
 
-void Server::chat_with_receiver() {
-  //
+void Server::chat_with_receiver(Info* info) {
+  while(1) {
+    Message request;
+    bool success = info->conn_info->receive(request);
+    if (!success) {
+      std::cerr << "Error receiving message";
+    }
+  }
 }
 
 Info::Info(Connection* conn) {

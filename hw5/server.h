@@ -7,7 +7,7 @@
 #include "connection.h"
 class Room;
 
-
+struct Info;
 
 class Server {
 public:
@@ -20,9 +20,9 @@ public:
 
   Room *find_or_create_room(const std::string &room_name);
 
-  void chat_with_sender();
+  void chat_with_sender(Info* info);
 
-  void chat_with_receiver();
+  void chat_with_receiver(Info* info);
 
 private:
   // prohibit value semantics
