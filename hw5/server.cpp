@@ -68,7 +68,13 @@ void Server::chat_with_sender(Info* info) {
     if (!success) {
       std::cerr << "Error receiving message";
     }
+    if (request.tag == "join") {
+    
+    }
   }
+
+  
+  
 
 }
 
