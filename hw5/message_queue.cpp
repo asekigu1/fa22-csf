@@ -46,7 +46,10 @@ Message *MessageQueue::dequeue() {
   }
 
   // TODO: remove the next message from the queue, return it
+  { Guard g(m_lock);
+  
   Message *msg = m_messages.front();
   m_messages.pop_front();
   return msg;
+  }
 }

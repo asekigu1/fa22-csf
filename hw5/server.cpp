@@ -34,6 +34,7 @@ void *worker(void *arg) {
   //       to communicate with a client (sender or receiver)
   
   Info* info = (Info*) arg;
+  
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
   //server object and connection
@@ -46,9 +47,18 @@ void *worker(void *arg) {
   else if (request.tag == TAG_SLOGIN) {
     User* user = new User(request.data);
     info->server->chat_with_sender(info,user);
+    Message login;
+    login.tag = "ok";
+    login.data = "logged in as " + request.data;
+    info->conn_info->send(login);
+    
   }
   else if (request.tag == TAG_RLOGIN) {
     User* user = new User(request.data);
+    Message login;
+    login.tag = "ok";
+    login.data = "logged in as " + request.data;
+    info->conn_info->send(login);
     info->server->chat_with_receiver(info,user);
   }
   // TODO: depending on whether the client logged in as a sender or
@@ -196,7 +206,8 @@ bool Server::listen() {
   //       if successful, false if not
   std::string s = std::to_string(m_port);
   char const *c_m_port = s.c_str();
-  if (open_listenfd(c_m_port) < 0) {
+  m_ssock = open_listenfd(c_m_port);
+  if (m_ssock < 0) {
     return false;
   }
   return true;
@@ -208,7 +219,9 @@ void Server::handle_client_requests() {
   // TODO: infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
   while(1) {
-   int clientfd = Accept(m_ssock, NULL, NULL);
+    
+    int clientfd = Accept(m_ssock, NULL, NULL);
+    
     if (clientfd < 0) {
       std::cerr << "Error accepting client connection";
     }

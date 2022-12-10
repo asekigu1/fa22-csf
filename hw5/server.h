@@ -43,6 +43,7 @@ private:
 struct Info{
   Connection* conn_info;
   Server* server;
+  int clientfd;
   Info(Connection*);
 };
 
