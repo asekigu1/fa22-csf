@@ -46,15 +46,18 @@ void *worker(void *arg) {
   }
   else if (request.tag == TAG_SLOGIN) {
     User* user = new User(request.data);
-    info->server->chat_with_sender(info,user);
+    user->user_info = info;
     Message login;
     login.tag = "ok";
     login.data = "logged in as " + request.data;
     info->conn_info->send(login);
+    info->server->chat_with_sender(info,user);
+    
     
   }
   else if (request.tag == TAG_RLOGIN) {
     User* user = new User(request.data);
+    user->user_info = info;
     Message login;
     login.tag = "ok";
     login.data = "logged in as " + request.data;
