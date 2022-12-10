@@ -86,10 +86,14 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
     Message request;
     bool success = info->conn_info->receive(request);
     if (!success) {
-      std::cerr << "Error receiving message";
+      Message error;
+      error.tag = "err";
+      error.data = "failed receiving message";
+      info->conn_info->send(error);
     }
+
     if (request.tag == "join") {
-      Room* room = find_or_create_room(request.data);
+      Room* room = server->find_or_create_room(request.data);
       room->add_member(user);
       user->users_room = room;
       Message join_room_message;
@@ -98,11 +102,21 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
       info->conn_info->send(join_room_message);
       
     } else if (request.tag == "sendall") {
-      user->users_room->broadcast_message(user->username, request.data);
-      Message sent_message;
-      sent_message.tag = "ok";
-      sent_message.data = "message sent";
-      info->conn_info->send(sent_message);
+      if (user->users_room == nullptr) {
+        Message not_in_room;
+        not_in_room.tag = "err";
+        not_in_room.data = "You are not in a room!";
+        info->conn_info->send(not_in_room);
+      }
+      else {
+        user->users_room->broadcast_message(user->username, request.data);
+        Message sent_message;
+        sent_message.tag = "ok";
+        sent_message.data = "message sent";
+        info->conn_info->send(sent_message);
+      }
+
+      
     } else if (request.tag == "leave") {
       if (user->users_room == nullptr) {
         Message not_in_room;
@@ -124,8 +138,8 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
     } else if (request.tag == "quit") {
       Message quit_message;
       quit_message.tag = "ok";
-      quit_message.data = "logging you out";
-      info->conn_info->close();
+      quit_message.data = "quitting";
+      return;
     } else {
       Message error;
       error.tag = "err";
