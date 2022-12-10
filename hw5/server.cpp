@@ -72,6 +72,7 @@ void Server::chat_with_sender(Info* info) {
     
     }
   }
+  
 
   
   
@@ -148,4 +149,11 @@ void Server::handle_client_requests() {
 Room *Server::find_or_create_room(const std::string &room_name) {
   // TODO: return a pointer to the unique Room object representing
   //       the named chat room, creating a new one if necessary
+  if (m_rooms.find(room_name)!= m_rooms.end()) {
+    return m_rooms.at(room_name);
+  }
+  Room* new_room = new Room(room_name);
+  m_rooms.insert(std::pair<std::string,Room*>(room_name, new_room));
+  return m_rooms.at(room_name);
+
 }
