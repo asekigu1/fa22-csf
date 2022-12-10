@@ -21,9 +21,9 @@ public:
 
   Room *find_or_create_room(const std::string &room_name);
 
-  void chat_with_sender(Info* info, User* user);
+  void chat_with_sender(Info* info, User* user, Server* server);
 
-  void chat_with_receiver(Info* info, User* user);
+  void chat_with_receiver(Info* info, User* user, Server *server);
 
 private:
   // prohibit value semantics

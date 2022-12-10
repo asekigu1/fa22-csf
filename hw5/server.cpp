@@ -80,7 +80,7 @@ void *worker(void *arg) {
 
 }
 
-void Server::chat_with_sender(Info* info,User* user) {
+void Server::chat_with_sender(Info* info,User* user, Server* server) {
   //
   while(1) {
     Message request;
@@ -146,52 +146,42 @@ void Server::chat_with_sender(Info* info,User* user) {
 
 }
 
-void Server::chat_with_receiver(Info* info,User* user) {
+void Server::chat_with_receiver(Info* info,User* user, Server* server) {
+  Message request;
+  Room* room;
+  bool success = info->conn_info->receive(request);
+  if (!success) {
+    std::cerr << "Error receiving message";
+  }
+
+  if (request.tag == "join") {
+    room = server->find_or_create_room(request.data);
+    room->add_member(user);
+    user->users_room = room;
+    Message join_room_message;
+    join_room_message.tag = "ok";
+    join_room_message.data = "room successfully joined";
+    info->conn_info->send(join_room_message);
+    
+  }else {
+    Message error;
+    error.tag = "err";
+    error.data = "Invalid join command from receiver!";
+    info->conn_info->send(error);
+  }
+
+
+
   while(1) {
-    Message request;
-    bool success = info->conn_info->receive(request);
-    if (!success) {
-      std::cerr << "Error receiving message";
-    }
+    Message* temp = user->mqueue.dequeue();
+    if (temp != nullptr) {
+      bool success = info->conn_info->send(*temp);
+      delete temp;
+      if (!success) {
+        room->remove_member(user);
 
-    if (request.tag == "join") {
-      Room* room = find_or_create_room(request.data);
-      room->add_member(user);
-      user->users_room = room;
-      Message join_room_message;
-      join_room_message.tag = "ok";
-      join_room_message.data = "room successfully joined";
-      info->conn_info->send(join_room_message);
-      
-    } else if (request.tag == "leave") {
-      if (user->users_room == nullptr) {
-        Message not_in_room;
-        not_in_room.tag = "err";
-        not_in_room.data = "You are not in a room!";
-        info->conn_info->send(not_in_room);
       }
-      else {
-        user->users_room->remove_member(user);
-        user->users_room = nullptr;
-        Message left_room;
-        left_room.tag = "ok";
-        left_room.data = "left room";
-        info->conn_info->send(left_room);
-      }
-    } else if (request.tag == "quit") {
-      Message quit_message;
-      quit_message.tag = "ok";
-      quit_message.data = "logging you out";
-      info->conn_info->close();
-    } else {
-      Message error;
-      error.tag = "err";
-      error.data = "Invalid command!";
-      info->conn_info->send(error);
     }
-
-
-
   }
   
 

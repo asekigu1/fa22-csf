@@ -16,7 +16,7 @@ MessageQueue::~MessageQueue() {
   while (!m_messages.empty()) {
     Message* temp = m_messages.front();
     delete temp;
-    m_messages.pop_front;
+    m_messages.pop_front();
   }
 
   // TODO: destroy the mutex and the semaphore
