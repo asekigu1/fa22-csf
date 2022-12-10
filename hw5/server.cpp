@@ -41,10 +41,12 @@ void *worker(void *arg) {
   Message request;
   
   bool success = info->conn_info->receive(request);
+  
   if (!success) {
     std::cerr << "Error receiving message";
   }
-  else if (request.tag == TAG_SLOGIN) {
+  request.data.pop_back();
+  if (request.tag == TAG_SLOGIN) {
     User* user = new User(request.data);
     
     Message login;
@@ -85,13 +87,14 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
   while(1) {
     Message request;
     bool success = info->conn_info->receive(request);
+    
     if (!success) {
       Message error;
       error.tag = "err";
       error.data = "failed receiving message";
       info->conn_info->send(error);
     }
-
+    request.data.pop_back();
     if (request.tag == "join") {
       Room* room = server->find_or_create_room(request.data);
       room->add_member(user);
@@ -164,10 +167,11 @@ void Server::chat_with_receiver(Info* info,User* user, Server* server) {
   Message request;
   Room* room;
   bool success = info->conn_info->receive(request);
+  
   if (!success) {
     std::cerr << "Error receiving message";
   }
-
+  request.data.pop_back();
   if (request.tag == "join") {
     room = server->find_or_create_room(request.data);
     room->add_member(user);
