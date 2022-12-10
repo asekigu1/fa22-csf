@@ -44,10 +44,12 @@ void *worker(void *arg) {
     std::cerr << "Error receiving message";
   }
   else if (request.tag == TAG_SLOGIN) {
-    info->server->chat_with_sender(info);
+    User* user = new User(request.data);
+    info->server->chat_with_sender(info,user);
   }
   else if (request.tag == TAG_RLOGIN) {
-    info->server->chat_with_receiver(info);
+    User* user = new User(request.data);
+    info->server->chat_with_receiver(info,user);
   }
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
@@ -60,7 +62,7 @@ void *worker(void *arg) {
 
 }
 
-void Server::chat_with_sender(Info* info) {
+void Server::chat_with_sender(Info* info,User* user) {
   //
   while(1) {
     Message request;
@@ -69,9 +71,23 @@ void Server::chat_with_sender(Info* info) {
       std::cerr << "Error receiving message";
     }
     if (request.tag == "join") {
-    
+      Room* room = find_or_create_room(request.data);
+      room->add_member(user);
+      user->users_room = room;
+      Message join_room_message;
+      join_room_message.tag = "Ok";
+      join_room_message.data = "room successfully joined";
+      info->conn_info->send(join_room_message);
+      
     }
+    if (request.tag == "sendall") {
+      user->users_room->broadcast_message(user->username, request.data);
+
+    }
+
+    
   }
+  
   
 
   
@@ -79,7 +95,7 @@ void Server::chat_with_sender(Info* info) {
 
 }
 
-void Server::chat_with_receiver(Info* info) {
+void Server::chat_with_receiver(Info* info,User* user) {
   while(1) {
     Message request;
     bool success = info->conn_info->receive(request);
