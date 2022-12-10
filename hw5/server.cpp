@@ -207,7 +207,7 @@ void Server::chat_with_receiver(Info* info,User* user, Server* server) {
       delete temp;
       if (!success) {
         room->remove_member(user);
-        
+
       }
     } 
   }
@@ -269,7 +269,7 @@ void Server::handle_client_requests() {
     info->server = this;
     
     pthread_t thread;
-    int rc = pthread_create(&thread, NULL, worker, info);
+    pthread_create(&thread, NULL, worker, info);
 
 
 
