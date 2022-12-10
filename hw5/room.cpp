@@ -30,12 +30,12 @@ void Room::broadcast_message(const std::string &sender_username, const std::stri
   // TODO: send a message to every (receiver) User in the room
 
   for (User* user: members){
-    std::string data = room_name + ":" + sender_username + ":" + message_text;
-    Message* message = new Message("delivery", data);
-    user->mqueue.enqueue(message);
-
-    
-
+    if (user->username != sender_username) {
+      std::string data = room_name + ":" + sender_username + ":" + message_text;
+      Message* message = new Message("delivery", data);
+      user->mqueue.enqueue(message);
+      user->user_info->conn_info->send(*user->mqueue.dequeue());
+    }
   }
 }
 
