@@ -52,7 +52,7 @@ void *worker(void *arg) {
     login.data = "logged in as " + request.data;
     info->conn_info->send(login);
 
-    info->server->chat_with_sender(info,user);
+    info->server->chat_with_sender(info,user, info->server);
     
   }
   else if (request.tag == TAG_RLOGIN) {
@@ -61,7 +61,7 @@ void *worker(void *arg) {
     login.tag = "ok";
     login.data = "logged in as " + request.data;
     info->conn_info->send(login);
-    info->server->chat_with_receiver(info,user);
+    info->server->chat_with_receiver(info,user, info->server);
   } else {
     Message error;
     error.tag = "err";
