@@ -12,6 +12,13 @@ MessageQueue::MessageQueue() {
 }
 
 MessageQueue::~MessageQueue() {
+  // free queue
+  while (!m_messages.empty()) {
+    Message* temp = m_messages.front();
+    delete temp;
+    m_messages.pop_front;
+  }
+
   // TODO: destroy the mutex and the semaphore
   pthread_mutex_destroy(&m_lock);
   sem_destroy(&m_avail);
