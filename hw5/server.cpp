@@ -127,7 +127,45 @@ void Server::chat_with_receiver(Info* info,User* user) {
     if (!success) {
       std::cerr << "Error receiving message";
     }
+
+    if (request.tag == "join") {
+      Room* room = find_or_create_room(request.data);
+      room->add_member(user);
+      user->users_room = room;
+      Message join_room_message;
+      join_room_message.tag = "ok";
+      join_room_message.data = "room successfully joined";
+      info->conn_info->send(join_room_message);
+      
+    }
+    if (request.tag == "leave") {
+      if (user->users_room == nullptr) {
+        Message not_in_room;
+        not_in_room.tag = "err";
+        not_in_room.data = "You are not in a room!";
+        info->conn_info->send(not_in_room);
+      }
+      Room* room = user->users_room;
+      user->users_room->remove_member(user);
+      user->users_room = nullptr;
+      Message left_room;
+      left_room.tag = "ok";
+      left_room.data = "left room";
+      info->conn_info->send(left_room);
+    }
+
+    if (request.tag == "quit") {
+      Message quit_message;
+      quit_message.tag = "ok";
+      quit_message.data = "logging you out";
+      info->conn_info->close();
+    }
+
+
+
   }
+  
+
 }
 
 Info::Info(Connection* conn) {
