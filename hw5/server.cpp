@@ -41,6 +41,7 @@ void *worker(void *arg) {
   Message request;
   
   bool success = info->conn_info->receive(request);
+  request.data.pop_back();
   if (!success) {
     std::cerr << "Error receiving message";
   }
@@ -80,6 +81,7 @@ void Server::chat_with_sender(Info* info,User* user) {
   while(1) {
     Message request;
     bool success = info->conn_info->receive(request);
+    request.data.pop_back();
     if (!success) {
       std::cerr << "Error receiving message";
     }
@@ -88,13 +90,17 @@ void Server::chat_with_sender(Info* info,User* user) {
       room->add_member(user);
       user->users_room = room;
       Message join_room_message;
-      join_room_message.tag = "Ok";
+      join_room_message.tag = "ok";
       join_room_message.data = "room successfully joined";
       info->conn_info->send(join_room_message);
       
     }
     if (request.tag == "sendall") {
       user->users_room->broadcast_message(user->username, request.data);
+      Message message_sent;
+      message_sent.tag = "ok";
+      message_sent.data = "message sent";
+      info->conn_info->send(message_sent);
 
     }
     if (request.tag == "leave") {
@@ -138,6 +144,7 @@ void Server::chat_with_receiver(Info* info,User* user) {
   while(1) {
     Message request;
     bool success = info->conn_info->receive(request);
+    request.data.pop_back();
     if (!success) {
       std::cerr << "Error receiving message";
     }
