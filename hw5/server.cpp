@@ -60,6 +60,11 @@ void *worker(void *arg) {
     login.data = "logged in as " + request.data;
     info->conn_info->send(login);
     info->server->chat_with_receiver(info,user);
+  } else {
+    Message error;
+    error.tag = "err";
+    error.data = "Invalid login attempt!";
+    info->conn_info->send(error);
   }
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
@@ -85,16 +90,17 @@ void Server::chat_with_sender(Info* info,User* user) {
       room->add_member(user);
       user->users_room = room;
       Message join_room_message;
-      join_room_message.tag = "Ok";
+      join_room_message.tag = "ok";
       join_room_message.data = "room successfully joined";
       info->conn_info->send(join_room_message);
       
-    }
-    if (request.tag == "sendall") {
+    } else if (request.tag == "sendall") {
       user->users_room->broadcast_message(user->username, request.data);
-
-    }
-    if (request.tag == "leave") {
+      Message sent_message;
+      sent_message.tag = "ok";
+      sent_message.data = "message sent";
+      info->conn_info->send(sent_message);
+    } else if (request.tag == "leave") {
       if (user->users_room == nullptr) {
         Message not_in_room;
         not_in_room.tag = "err";
@@ -112,13 +118,19 @@ void Server::chat_with_sender(Info* info,User* user) {
 
 
 
-    }
-    if (request.tag == "quit") {
+    } else if (request.tag == "quit") {
       Message quit_message;
       quit_message.tag = "ok";
       quit_message.data = "logging you out";
       info->conn_info->close();
+    } else {
+      Message error;
+      error.tag = "err";
+      error.data = "Invalid command!";
+      info->conn_info->send(error);
     }
+
+    
 
 
 
@@ -148,8 +160,7 @@ void Server::chat_with_receiver(Info* info,User* user) {
       join_room_message.data = "room successfully joined";
       info->conn_info->send(join_room_message);
       
-    }
-    if (request.tag == "leave") {
+    } else if (request.tag == "leave") {
       if (user->users_room == nullptr) {
         Message not_in_room;
         not_in_room.tag = "err";
@@ -164,13 +175,16 @@ void Server::chat_with_receiver(Info* info,User* user) {
         left_room.data = "left room";
         info->conn_info->send(left_room);
       }
-    }
-
-    if (request.tag == "quit") {
+    } else if (request.tag == "quit") {
       Message quit_message;
       quit_message.tag = "ok";
       quit_message.data = "logging you out";
       info->conn_info->close();
+    } else {
+      Message error;
+      error.tag = "err";
+      error.data = "Invalid command!";
+      info->conn_info->send(error);
     }
 
 
