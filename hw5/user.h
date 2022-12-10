@@ -3,6 +3,7 @@
 
 #include <string>
 #include "message_queue.h"
+#include "room.h"
 
 struct User {
   std::string username;
