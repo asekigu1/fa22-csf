@@ -55,7 +55,10 @@ void *worker(void *arg) {
     info->conn_info->send(login);
 
     info->server->chat_with_sender(info,user, info->server);
-    
+
+    delete info->conn_info;
+    delete info;
+    return nullptr;
   }
   else if (request.tag == TAG_RLOGIN) {
     User* user = new User(request.data);
@@ -139,9 +142,16 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
 
 
     } else if (request.tag == "quit") {
+      if (user->users_room != nullptr) {
+        // user is in a room, remove this user
+        user->users_room->remove_member(user);
+        user->users_room = nullptr;
+      }
+
       Message quit_message;
       quit_message.tag = "ok";
       quit_message.data = "quitting";
+      info->conn_info->send(quit_message);
       return;
     } else {
       Message error;
@@ -197,9 +207,9 @@ void Server::chat_with_receiver(Info* info,User* user, Server* server) {
       delete temp;
       if (!success) {
         room->remove_member(user);
-
+        
       }
-    }
+    } 
   }
   
 

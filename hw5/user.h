@@ -15,7 +15,9 @@ struct User {
   MessageQueue mqueue;
   Room* users_room;
   Info* user_info;
-  User(const std::string &username) : username(username) { }
+  User(const std::string &username) : username(username) {
+    users_room = nullptr;
+   }
 };
 
 #endif // USER_H
