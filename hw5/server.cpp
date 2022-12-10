@@ -32,52 +32,41 @@ void *worker(void *arg) {
   // TODO: use a static cast to convert arg from a void* to
   //       whatever pointer type describes the object(s) needed
   //       to communicate with a client (sender or receiver)
-  
   Info* info = (Info*) arg;
   
   // TODO: read login message (should be tagged either with
   //       TAG_SLOGIN or TAG_RLOGIN), send response
   //server object and connection
   Message request;
-  
   bool success = info->conn_info->receive(request);
-  
   if (!success) {
     std::cerr << "Error receiving message";
   }
   request.data.pop_back();
-  if (request.tag == TAG_SLOGIN) {
-    User* user = new User(request.data);
-    
-    Message login;
-    login.tag = "ok";
-    login.data = "logged in as " + request.data;
-    info->conn_info->send(login);
 
-    info->server->chat_with_sender(info,user, info->server);
-
-    delete info->conn_info;
+  if ( (request.tag != TAG_SLOGIN) && (request.tag != TAG_RLOGIN)) {
+    Message error1(TAG_ERR, "Invalid login attempt!");
+    info->conn_info->send(error1);
     delete info;
     return nullptr;
   }
-  else if (request.tag == TAG_RLOGIN) {
-    User* user = new User(request.data);
-    Message login;
-    login.tag = "ok";
-    login.data = "logged in as " + request.data;
-    info->conn_info->send(login);
-    info->server->chat_with_receiver(info,user, info->server);
-  } else {
-    Message error;
-    error.tag = "err";
-    error.data = "Invalid login attempt!";
-    info->conn_info->send(error);
-  }
+
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
   //       is a good idea)
 
+  User* user = new User(request.data);
+  Message login(TAG_OK, "logged in as "+request.data);
+  info->conn_info->send(login);
+
+  if (request.tag == TAG_SLOGIN) {
+    info->server->chat_with_sender(info,user, info->server);
+  } else if (request.tag == TAG_RLOGIN) {
+    info->server->chat_with_receiver(info,user, info->server);
+  }
+
+  delete user;
   delete info;
   return nullptr;
 }
@@ -86,56 +75,45 @@ void *worker(void *arg) {
 }
 
 void Server::chat_with_sender(Info* info,User* user, Server* server) {
-  //
+  
   while(1) {
     Message request;
     bool success = info->conn_info->receive(request);
     
     if (!success) {
-      Message error;
-      error.tag = "err";
-      error.data = "failed receiving message";
-      info->conn_info->send(error);
+      Message error2(TAG_ERR, "Failed receiving message");
+      info->conn_info->send(error2);
     }
+
     request.data.pop_back();
     if (request.tag == "join") {
       Room* room = server->find_or_create_room(request.data);
       room->add_member(user);
       user->users_room = room;
-      Message join_room_message;
-      join_room_message.tag = "ok";
-      join_room_message.data = "room successfully joined";
+      Message join_room_message(TAG_OK, "room successfully joined");
       info->conn_info->send(join_room_message);
       
     } else if (request.tag == "sendall") {
       if (user->users_room == nullptr) {
-        Message not_in_room;
-        not_in_room.tag = "err";
-        not_in_room.data = "You are not in a room!";
-        info->conn_info->send(not_in_room);
+        Message error3(TAG_ERR, "You are not in a room");
+        info->conn_info->send(error3);
       }
       else {
         user->users_room->broadcast_message(user->username, request.data);
-        Message sent_message;
-        sent_message.tag = "ok";
-        sent_message.data = "message sent";
+        Message sent_message(TAG_OK, "message sent");
         info->conn_info->send(sent_message);
       }
 
       
     } else if (request.tag == "leave") {
       if (user->users_room == nullptr) {
-        Message not_in_room;
-        not_in_room.tag = "err";
-        not_in_room.data = "You are not in a room!";
+        Message not_in_room(TAG_ERR, "You are not in a room!");
         info->conn_info->send(not_in_room);
       }
       else {
         user->users_room->remove_member(user);
         user->users_room = nullptr;
-        Message left_room;
-        left_room.tag = "ok";
-        left_room.data = "left room";
+        Message left_room(TAG_OK, "successfully left room");
         info->conn_info->send(left_room);
       }
 
@@ -148,15 +126,11 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
         user->users_room = nullptr;
       }
 
-      Message quit_message;
-      quit_message.tag = "ok";
-      quit_message.data = "quitting";
+      Message quit_message(TAG_OK, "quitting");
       info->conn_info->send(quit_message);
       return;
     } else {
-      Message error;
-      error.tag = "err";
-      error.data = "Invalid command!";
+      Message error(TAG_ERR, "Invalid command!");
       info->conn_info->send(error);
     }
 
@@ -176,25 +150,17 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
 void Server::chat_with_receiver(Info* info,User* user, Server* server) {
   Message request;
   Room* room;
-  bool success = info->conn_info->receive(request);
-  
-  if (!success) {
-    std::cerr << "Error receiving message";
-  }
+  info->conn_info->receive(request);
   request.data.pop_back();
   if (request.tag == "join") {
     room = server->find_or_create_room(request.data);
     room->add_member(user);
     user->users_room = room;
-    Message join_room_message;
-    join_room_message.tag = "ok";
-    join_room_message.data = "room successfully joined";
+    Message join_room_message(TAG_OK, "room successfully joined");
     info->conn_info->send(join_room_message);
     
   }else {
-    Message error;
-    error.tag = "err";
-    error.data = "Invalid join command from receiver!";
+    Message error(TAG_ERR, "Invalid join command from receiver!");
     info->conn_info->send(error);
   }
 

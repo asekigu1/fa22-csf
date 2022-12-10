@@ -6,13 +6,11 @@
 MessageQueue::MessageQueue() {
   // TODO: initialize the mutex and the semaphore
   pthread_mutex_init(&m_lock, NULL);
-  //set max connections to 15?
   sem_init(&m_avail, 0,0);
-  
 }
 
 MessageQueue::~MessageQueue() {
-  // free queue
+  // free all messages left in the queue
   while (!m_messages.empty()) {
     Message* temp = m_messages.front();
     delete temp;

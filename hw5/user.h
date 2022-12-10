@@ -16,7 +16,7 @@ struct User {
   Room* users_room;
   Info* user_info;
   User(const std::string &username) : username(username) {
-    users_room = nullptr;
+    users_room = nullptr; // initialize room to nullptr
    }
 };
 

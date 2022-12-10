@@ -19,7 +19,6 @@ void Room::add_member(User *user) {
   // TODO: add User to the room
   Guard g(lock);
   members.insert(user);
-
 }
 
 void Room::remove_member(User *user) {
@@ -34,7 +33,7 @@ void Room::broadcast_message(const std::string &sender_username, const std::stri
   for (User* user: members){
     if (user->username != sender_username) {
       std::string data = room_name + ":" + sender_username + ":" + message_text;
-      Message* message = new Message("delivery", data);
+      Message* message = new Message(TAG_DELIVERY, data);
       user->mqueue.enqueue(message);
     }
   }
