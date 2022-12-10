@@ -91,13 +91,14 @@ void Server::chat_with_sender(Info* info,User* user) {
         not_in_room.data = "You are not in a room!";
         info->conn_info->send(not_in_room);
       }
-      Room* room = user->users_room;
-      user->users_room->remove_member(user);
-      user->users_room = nullptr;
-      Message left_room;
-      left_room.tag = "ok";
-      left_room.data = "left room";
-      info->conn_info->send(left_room);
+      else {
+        user->users_room->remove_member(user);
+        user->users_room = nullptr;
+        Message left_room;
+        left_room.tag = "ok";
+        left_room.data = "left room";
+        info->conn_info->send(left_room);
+      }
 
 
 
@@ -145,13 +146,14 @@ void Server::chat_with_receiver(Info* info,User* user) {
         not_in_room.data = "You are not in a room!";
         info->conn_info->send(not_in_room);
       }
-      Room* room = user->users_room;
-      user->users_room->remove_member(user);
-      user->users_room = nullptr;
-      Message left_room;
-      left_room.tag = "ok";
-      left_room.data = "left room";
-      info->conn_info->send(left_room);
+      else {
+        user->users_room->remove_member(user);
+        user->users_room = nullptr;
+        Message left_room;
+        left_room.tag = "ok";
+        left_room.data = "left room";
+        info->conn_info->send(left_room);
+      }
     }
 
     if (request.tag == "quit") {
