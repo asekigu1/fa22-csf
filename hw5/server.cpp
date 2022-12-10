@@ -84,8 +84,33 @@ void Server::chat_with_sender(Info* info,User* user) {
       user->users_room->broadcast_message(user->username, request.data);
 
     }
+    if (request.tag == "leave") {
+      if (user->users_room == nullptr) {
+        Message not_in_room;
+        not_in_room.tag = "err";
+        not_in_room.data = "You are not in a room!";
+        info->conn_info->send(not_in_room);
+      }
+      Room* room = user->users_room;
+      user->users_room->remove_member(user);
+      user->users_room = nullptr;
+      Message left_room;
+      left_room.tag = "ok";
+      left_room.data = "left room";
+      info->conn_info->send(left_room);
 
-    
+
+
+    }
+    if (request.tag == "quit") {
+      Message quit_message;
+      quit_message.tag = "ok";
+      quit_message.data = "logging you out";
+      info->conn_info->close();
+    }
+
+
+
   }
   
   
