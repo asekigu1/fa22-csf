@@ -46,11 +46,13 @@ void *worker(void *arg) {
   }
   else if (request.tag == TAG_SLOGIN) {
     User* user = new User(request.data);
-    info->server->chat_with_sender(info,user);
+    
     Message login;
     login.tag = "ok";
     login.data = "logged in as " + request.data;
     info->conn_info->send(login);
+
+    info->server->chat_with_sender(info,user);
     
   }
   else if (request.tag == TAG_RLOGIN) {
@@ -71,6 +73,7 @@ void *worker(void *arg) {
   //       separate helper functions for each of these possibilities
   //       is a good idea)
 
+  delete info;
   return nullptr;
 }
 
@@ -211,6 +214,10 @@ Server::Server(int port)
 }
 
 Server::~Server() {
+  
+  for (RoomMap::iterator it = m_rooms.begin(); it != m_rooms.end(); it++) {
+    delete it->second;
+  }
   // TODO: destroy mutex
   pthread_mutex_destroy(&m_lock);
 }
@@ -245,6 +252,7 @@ void Server::handle_client_requests() {
     
     pthread_t thread;
     int rc = pthread_create(&thread, NULL, worker, info);
+
 
 
     //server object
