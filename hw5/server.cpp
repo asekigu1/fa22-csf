@@ -49,6 +49,9 @@ void *worker(void *arg) {
     Message login(TAG_OK, "logged in as "+request.data);
     info->conn_info->send(login);
     info->server->chat_with_sender(info,user, info->server);
+    delete info->conn_info;
+    delete info;
+    return nullptr;
   }
   else if (request.tag == TAG_RLOGIN) {
     user = new User(request.data);
@@ -82,7 +85,7 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
       Message error2(TAG_ERR, "Failed receiving message");
       info->conn_info->send(error2);
     }
-
+    
     request.data.pop_back();
     if (request.tag == "join") {
       Room* room = server->find_or_create_room(request.data);
@@ -97,9 +100,15 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
         info->conn_info->send(not_in_room);
       }
       else {
-        user->users_room->broadcast_message(user->username, request.data);
-        Message sent_message(TAG_OK, "message sent");
-        info->conn_info->send(sent_message);
+        if (request.data.length() <= Message::MAX_LEN) {
+          user->users_room->broadcast_message(user->username, request.data);
+          Message sent_message(TAG_OK, "message sent");
+          info->conn_info->send(sent_message);
+        }
+        else {
+          Message too_long(TAG_ERR, "Message is to long");
+          info->conn_info->send(too_long);
+        }
       }
 
       
