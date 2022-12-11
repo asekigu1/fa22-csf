@@ -44,27 +44,25 @@ void *worker(void *arg) {
   }
   request.data.pop_back();
 
-  if ( (request.tag != TAG_SLOGIN) && (request.tag != TAG_RLOGIN)) {
+  if (request.tag == TAG_SLOGIN) {
+    User* user = new User(request.data);
+    Message login(TAG_OK, "logged in as "+request.data);
+    info->conn_info->send(login);
+    info->server->chat_with_sender(info,user, info->server);
+  }
+  else if (request.tag == TAG_RLOGIN) {
+    User* user = new User(request.data);
+    Message login(TAG_OK, "logged in as "+request.data);
+    info->conn_info->send(login);
+    info->server->chat_with_receiver(info,user, info->server);
+  } else {
     Message error1(TAG_ERR, "Invalid login attempt!");
     info->conn_info->send(error1);
-    delete info;
-    return nullptr;
   }
-
   // TODO: depending on whether the client logged in as a sender or
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
   //       is a good idea)
-
-  User* user = new User(request.data);
-  Message login(TAG_OK, "logged in as "+request.data);
-  info->conn_info->send(login);
-
-  if (request.tag == TAG_SLOGIN) {
-    info->server->chat_with_sender(info,user, info->server);
-  } else if (request.tag == TAG_RLOGIN) {
-    info->server->chat_with_receiver(info,user, info->server);
-  }
 
   delete user;
   delete info;
@@ -95,8 +93,8 @@ void Server::chat_with_sender(Info* info,User* user, Server* server) {
       
     } else if (request.tag == "sendall") {
       if (user->users_room == nullptr) {
-        Message error3(TAG_ERR, "You are not in a room");
-        info->conn_info->send(error3);
+        Message not_in_room(TAG_ERR, "You are not in a room");
+        info->conn_info->send(not_in_room);
       }
       else {
         user->users_room->broadcast_message(user->username, request.data);
@@ -160,8 +158,8 @@ void Server::chat_with_receiver(Info* info,User* user, Server* server) {
     info->conn_info->send(join_room_message);
     
   }else {
-    Message error(TAG_ERR, "Invalid join command from receiver!");
-    info->conn_info->send(error);
+    Message error5(TAG_ERR, "Invalid join command from receiver!");
+    info->conn_info->send(error5);
   }
 
 
