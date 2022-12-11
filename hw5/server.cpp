@@ -43,15 +43,15 @@ void *worker(void *arg) {
     std::cerr << "Error receiving message";
   }
   request.data.pop_back();
-
+  User* user;
   if (request.tag == TAG_SLOGIN) {
-    User* user = new User(request.data);
+    user = new User(request.data);
     Message login(TAG_OK, "logged in as "+request.data);
     info->conn_info->send(login);
     info->server->chat_with_sender(info,user, info->server);
   }
   else if (request.tag == TAG_RLOGIN) {
-    User* user = new User(request.data);
+    user = new User(request.data);
     Message login(TAG_OK, "logged in as "+request.data);
     info->conn_info->send(login);
     info->server->chat_with_receiver(info,user, info->server);
