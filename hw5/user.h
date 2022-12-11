@@ -14,7 +14,6 @@ struct User {
   // queue of pending messages awaiting delivery
   MessageQueue mqueue;
   Room* users_room;
-  Info* user_info;
   User(const std::string &username) : username(username) {
     users_room = nullptr; // initialize room to nullptr
   }
