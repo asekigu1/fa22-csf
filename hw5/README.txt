@@ -8,6 +8,27 @@ Contributions:
 We mostly implemented and debugged synchronously.
 
 Synchronization report:
+We manipulate pthreads using pthread_mutex_init and
+pthread_mutex_destroy, for MessageQueue, Room, and 
+the Server. This allows us to lock certain functions
+in these classes, ensuring that only one client 
+call is executing at a time, and not interfering 
+with any variables while executing.
+
+We use a semaphore in MessageQueue, and use the 
+functions sem_init, sem_destroy, sem_post, and 
+sem_timedwait. Semaphore is only used in MessageQueue
+because in MessageQueue we need to be able to notify
+if messages are available for send. Rooms and 
+servers do not need to be regularly checked for new
+elements. The semaphore allows the code to sleep 
+until there is a new message, and then wake up 
+when a message is available.
+
+We synchronize using Guard g(lock) instead of explicitly calling
+pthread_mutex_lock, as specified in the instructions. This help
+avoid deadlocks. Below are the instances we lock, and why.
+
 MessageQueue:
 For MessageQueue enqeue() and dequeue(), we mostly just followed 
 the TODO insturctions. Since multiple senders can send messages 
